@@ -1,0 +1,6 @@
+{
+  "id": "lean",
+  "title": "Lean Spec",
+  "description": "Problem, Solution, Success Criteria, Risks.",
+  "content": "# Problem\n[What's broken? What's hard?]\n\n# Solution\n[How do we fix it?]\n\n# Success Criteria\n[How do we know it worked?]\n\n# Risks & Mitigations\n[What might trip us up?]"
+}

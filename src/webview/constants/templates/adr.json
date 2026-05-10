@@ -1,0 +1,6 @@
+{
+  "id": "adr",
+  "title": "Architecture Decision (ADR)",
+  "description": "Status, Context, Decision, Consequences, Alternatives.",
+  "content": "# ADR-001: [Title]\n\nStatus: Proposed\n\n## Context\n[What's the situation?]\n\n## Decision\n[What are we doing?]\n\n## Consequences\n[What happens as a result?]\n\n## Alternatives Considered\n[Option A, Option B]"
+}

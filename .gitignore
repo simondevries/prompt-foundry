@@ -1,0 +1,8 @@
+out
+dist
+node_modules
+.idea
+.vscode-test/
+*.vsix
+prompt-forge-0.0.1.vsix
+**/.DS_Store

@@ -1,0 +1,6 @@
+{
+  "id": "narrative",
+  "title": "Narrative Design Doc",
+  "description": "Context, Goals, Solution Narrative, Implementation Strategy.",
+  "content": "# [Title]\n\n## Context & Background\n[Problem statement and why now?]\n\n## Goals\n[What we're solving]\n\n## Design\n[Solution narrative and how pieces fit together]\n\n## Implementation Strategy\n[Phased approach and dependencies]"
+}

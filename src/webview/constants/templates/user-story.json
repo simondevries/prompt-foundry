@@ -1,0 +1,6 @@
+{
+  "id": "user-story",
+  "title": "User Story + AC",
+  "description": "User Story, Acceptance Criteria, Technical Notes.",
+  "content": "# User Story\nAs a [user type], I want [capability] so that [benefit]\n\n# Acceptance Criteria\n- [Criterion 1]\n- [Criterion 2]\n\n# Technical Notes\n[Implementation details or dependencies]"
+}

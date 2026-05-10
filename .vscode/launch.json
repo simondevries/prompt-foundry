@@ -1,0 +1,41 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
+// Use IntelliSense to learn about possible attributes.
+// Hover to view descriptions of existing attributes.
+// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Run Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"preLaunchTask": "npm: watch"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug MCP Server",
+			"runtimeExecutable": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/inspector",
+				"node",
+				"${workspaceFolder}/dist/mcp.bundle.js"
+			],
+			"env": {
+				"PROMPT_ROOT": "/Users/simondevries/Prompt Library"
+			},
+			"console": "integratedTerminal",
+			"preLaunchTask": "npm: watch",
+			"outFiles": [
+				"${workspaceFolder}/dist/mcp.bundle.js"
+			]
+		}
+	]
+}

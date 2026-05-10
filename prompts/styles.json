@@ -1,0 +1,26 @@
+{
+  "(I) Preparation & research": {
+    "color": "hsla(210, 70%, 50%, 0.1)",
+    "borderColor": "hsla(210, 70%, 40%, 0.3)"
+  },
+  "(II) Execution": {
+    "color": "hsla(120, 60%, 45%, 0.1)",
+    "borderColor": "hsla(120, 60%, 40%, 0.3)"
+  },
+  "(III) Task completion": {
+    "color": "hsla(30, 80%, 50%, 0.1)",
+    "borderColor": "hsla(30, 80%, 40%, 0.3)"
+  },
+  "Micro": {
+    "color": "hsla(330, 80%, 50%, 0.1)",
+    "borderColor": "hsla(330, 80%, 40%, 0.3)"
+  },
+  "Workflows": {
+    "color": "hsla(280, 80%, 50%, 0.1)",
+    "borderColor": "hsla(280, 80%, 40%, 0.3)"
+  },
+  "Context": {
+    "color": "hsla(200, 80%, 50%, 0.1)",
+    "borderColor": "hsla(200, 80%, 40%, 0.3)"
+  }
+}

@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"module": "Node16",
+		"target": "ES2022",
+		"lib": [
+			"ES2022",
+			"DOM"
+		],
+		"sourceMap": true,
+		"rootDir": "src",
+		"strict": true,
+		"jsx": "react",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"moduleResolution": "Node16",
+		"resolveJsonModule": true
+	},
+	"exclude": [
+		"node_modules",
+		"dist",
+		"out",
+		".vscode-test"
+	]
+}

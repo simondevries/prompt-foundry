@@ -1,0 +1,107 @@
+{
+  "name": "prompt-forge",
+  "publisher": "sdevries",
+  "displayName": "Prompt Forge",
+  "description": "Forge complex AI prompts from a library of reusable blocks.",
+  "version": "0.0.1",
+  "icon": "assets/150.png",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prompt-forge-sidebar",
+          "title": "Prompt Forge",
+          "icon": "assets/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "prompt-forge-sidebar": [
+        {
+          "type": "webview",
+          "id": "prompt-forge.mainPrompt",
+          "name": "Prompt Forge",
+          "icon": "$(edit)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "prompt-forge.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "prompt-forge.sendToAI",
+        "title": "Send to AI"
+      }
+    ],
+    "configuration": {
+      "title": "Prompt Forge",
+      "properties": {
+        "promptForge.promptFolder": {
+          "type": "string",
+          "default": "",
+          "description": "Custom folder for storing prompts. If empty, defaults to ~/Prompt Library."
+        },
+        "promptForge.showClaudeCodeBlocks": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show Claude Code skills, commands, and instructions as prompt blocks. DISCLAIMER: Enabling this allows Prompt Forge to read files from your .claude/ directory."
+        },
+        "promptForge.showCursorRules": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show Cursor rules and .mdc files as prompt blocks. DISCLAIMER: Enabling this allows Prompt Forge to read files from your .cursor/ directory."
+        },
+        "promptForge.historyRetentionLimit": {
+          "type": "number",
+          "default": 50,
+          "description": "Number of sessions to keep in history. 0 means unlimited."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/vscode": "^1.105.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "copy-webpack-plugin": "^14.0.0",
+    "eslint": "^9.39.2",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@vscode/codicons": "^0.0.45",
+    "diff": "^8.0.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

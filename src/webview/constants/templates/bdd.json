@@ -1,0 +1,6 @@
+{
+  "id": "bdd",
+  "title": "Behavioral (BDD)",
+  "description": "Feature, Scenario, Given, When, Then.",
+  "content": "# Feature: [Feature Name]\n\nScenario: [Scenario Name]\n  Given [Context]\n  When [Action]\n  Then [Outcome]"
+}

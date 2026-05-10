@@ -1,0 +1,6 @@
+{
+  "id": "rfc",
+  "title": "RFC Style",
+  "description": "Motivation, Guide, Reference, Drawbacks, Alternatives.",
+  "content": "# RFC: [Title]\n\n## Motivation\n[Why are we doing this?]\n\n## Guide-level Explanation\n[How will users interact?]\n\n## Reference-level Explanation\n[Technical details]\n\n## Drawbacks\n[What are the tradeoffs?]\n\n## Rationale & Alternatives\n[Why this design?]"
+}

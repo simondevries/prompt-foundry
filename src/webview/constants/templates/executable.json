@@ -1,0 +1,6 @@
+{
+  "id": "executable",
+  "title": "Executable Spec",
+  "description": "Describe and It blocks for technical behavior.",
+  "content": "describe(\"[Feature Name]\", () => {\n  it(\"should [expected behavior]\", () => {\n    // [Test documents behavior]\n  });\n});"
+}

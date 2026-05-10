@@ -1,0 +1,6 @@
+{
+  "id": "hierarchical",
+  "title": "Hierarchical Spec",
+  "description": "Overview, Goals, Requirements, Design, Implementation, Testing.",
+  "content": "# Project/Feature Name\n\n## Overview\n[What is this? Why are we building it?]\n\n## Goals & Success Metrics\n[What defines success?]\n\n## Requirements\n### Functional Requirements\n[What must it do?]\n\n### Non-Functional Requirements\n[Performance, scalability, etc.]\n\n## Design & Architecture\n[System diagram, major components]\n\n## Implementation\n[Tech stack, key details]\n\n## Testing Strategy\n[Unit, integration, E2E]"
+}
