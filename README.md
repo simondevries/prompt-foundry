@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="assets/logo.svg" alt="Prompt Forge Logo" width="120" />
+  <img src="assets/150.png" alt="Prompt Forge Logo" width="150" />
   <h1>Prompt Forge</h1>
 </div>
 
-Prompt Forge is an extension for vscode and forks (cursor/antigravity) to more rapidly build more effective prompts. It provides a prompt library, tooling, templates, and a self-learning library of prompts which AI can automatically improve at the end of the conversation.
+Prompt Forge is an extension for vscode and forks (cursor/antigravity) to more rapidly build more effective prompts. It provides a prompt library, tooling, templates, and a self-learning library of living blocks that update and evolve with your project, which AI can automatically improve at the end of the conversation.
 
 Prompt forge ensures you get the most out of AI by writing better prompts and helps provide guiderails for how AI should operate. This extension allows you to:
 

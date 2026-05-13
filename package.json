@@ -2,10 +2,21 @@
   "name": "prompt-forge",
   "publisher": "sdevries",
   "displayName": "Prompt Forge",
-  "description": "Forge complex AI prompts from a library of reusable blocks.",
+  "description": "Forge complex AI prompts from a library of living blocks that update and evolve with your project.",
   "version": "0.0.1",
   "icon": "assets/150.png",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simondevries/prompt-forge"
+  },
+  "keywords": [
+    "prompt",
+    "ai",
+    "llm",
+    "cursor",
+    "claude"
+  ],
   "engines": {
     "vscode": "^1.105.0"
   },
