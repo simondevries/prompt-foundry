@@ -1117,7 +1117,7 @@ const App: React.FC = () => {
             <div className="modal-title">{confirmModal.title}</div>
             <div className="modal-message">{confirmModal.message}</div>
             <div className="modal-buttons">
-              {confirmModal.title === "Prompt Forge MCP Server" ? (
+              {confirmModal.title === "Prompt Foundry MCP Server" ? (
                 <button
                   className="modal-btn modal-btn-confirm"
                   onClick={confirmModal.onConfirm}
@@ -1218,7 +1218,7 @@ const App: React.FC = () => {
             content: (
               <div>
                 <p>
-                  <strong>Why is this needed?</strong> Prompt Forge needs access
+                  <strong>Why is this needed?</strong> Prompt Foundry needs access
                   to a local folder to serve as your dedicated prompt library
                   workspace.
                 </p>
@@ -1270,7 +1270,7 @@ const App: React.FC = () => {
             icon: "claude",
             content: (
               <div>
-                <p>Allow Prompt Forge to read Claude Code skills and commands.</p>
+                <p>Allow Prompt Foundry to read Claude Code skills and commands.</p>
                 <button
                   className="main-btn"
                   onClick={() =>
@@ -1291,7 +1291,7 @@ const App: React.FC = () => {
             icon: "cursor",
             content: (
               <div>
-                <p>Allow Prompt Forge to read Cursor rules.</p>
+                <p>Allow Prompt Foundry to read Cursor rules.</p>
                 <button
                   className="main-btn"
                   onClick={() =>
@@ -1313,7 +1313,7 @@ const App: React.FC = () => {
             content: (
               <div>
                 <p>
-                  The Prompt Forge MCP Server powers a circular, self-improving
+                  The Prompt Foundry MCP Server powers a circular, self-improving
                   prompt library. AI agents can read and improve your prompt
                   blocks based on session learning.
                 </p>

@@ -1,16 +1,16 @@
 <div align="center">
-  <img src="assets/150.png" alt="Prompt Forge Logo" width="150" />
-  <h1>Prompt Forge</h1>
+  <img src="assets/150.png" alt="Prompt Foundry Logo" width="150" />
+  <h1>Prompt Foundry</h1>
 </div>
 
-Prompt Forge is an extension for vscode and forks (cursor/antigravity) to more rapidly build more effective prompts. It provides a prompt library, tooling, templates, and a self-learning library of living blocks that update and evolve with your project, which AI can automatically improve at the end of the conversation.
+Prompt Foundry is an extension for vscode and forks (cursor/antigravity) to more rapidly build more effective prompts. It provides a prompt library, tooling, templates, and a self-learning library of living blocks that update and evolve with your project, which AI can automatically improve at the end of the conversation.
 
-Prompt forge ensures you get the most out of AI by writing better prompts and helps provide guiderails for how AI should operate. This extension allows you to:
+Prompt foundry ensures you get the most out of AI by writing better prompts and helps provide guiderails for how AI should operate. This extension allows you to:
 
 * **Compile prompt blocks** to construct a clear set of instructions and context.
   *Benefit:* Provide the right instructions and context for the task at hand.
   *Benefit:* Move information that is irrelevant for the current task out of agents.md and skills and reduce context bloat.
-* **Build and evolve a knowledge library** with your project. Prompt forge comes with a local MCP server to let AI update your prompt block library at the end of the conversation.
+* **Build and evolve a knowledge library** with your project. Prompt foundry comes with a local MCP server to let AI update your prompt block library at the end of the conversation.
   *Benefit:* Knowledge library that stays up to date. AI has information for the task.
 * **Specify key goals** for the AI to keep it on track. Use AI contracts to steer the AI towards specific behaviours.
   *Benefit:* AI behaves the way you intend it, and helps make the AI more deterministic.
@@ -25,11 +25,11 @@ More reasons to use this tool:
 ## Demo
 
 <div align="center">
-  <img src="assets/demo1.gif" alt="Prompt Forge Demo 1" width="80%" />
+  <img src="assets/demo1.gif" alt="Prompt Foundry Demo 1" width="80%" />
   <br/>
   <em>Building a prompt with reusable blocks</em>
   <br/><br/>
-  <img src="assets/demo2.gif" alt="Prompt Forge Demo 2" width="80%" />
+  <img src="assets/demo2.gif" alt="Prompt Foundry Demo 2" width="80%" />
   <br/>
   <em>Using MCP server to update blocks</em>
 </div>
@@ -50,7 +50,7 @@ Example using antigravity:
 ```json
 {
   "mcpServers": {
-    "prompt-forge": {
+    "prompt-foundry": {
       "command": "node",
       "args": [
         "/Users/[USERNAME]/.antigravity/extensions/[USERNAME]/dist/mcp.bundle.js"
@@ -75,7 +75,7 @@ Pressing the live focus (⚡) button will allow you to select files and lines in
 ### Adding prompt blocks
 Prompt blocks are broken down into categories; one for each folder and also a set of special categories (bottom). 
 
-**Goals (References):** Generally it is hard to get the AI to follow instructions when it has been given lots of information. This is why prompt forge adds the ability to mark blocks as a Goal (using references). When you press the star next to an added block, it adds the block's associated reference to a specific location in the final prompt. By reiterating a specific goal at key points in the workflow, it makes the AI much more likely to stay on track and follow it.
+**Goals (References):** Generally it is hard to get the AI to follow instructions when it has been given lots of information. This is why prompt foundry adds the ability to mark blocks as a Goal (using references). When you press the star next to an added block, it adds the block's associated reference to a specific location in the final prompt. By reiterating a specific goal at key points in the workflow, it makes the AI much more likely to stay on track and follow it.
 
 Goals are added to prompt templates by defining a `reference` and a `referenceLocation` in the comment frontmatter. The `referenceLocation` determines where the goal is injected in the prompt (e.g., `workflowFirstTurn`, `workflowEveryChange`, `workflowBeforeEditing`, `workflowEndOfTask`, `pre`, or `remark`).
 

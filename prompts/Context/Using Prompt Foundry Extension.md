@@ -1,20 +1,20 @@
 <!-- 
 # ReferenceLocation: none
 -->
-# Context: Prompt Forge
+# Context: Prompt Foundry
 
-This context file explains **Prompt Forge**, the VSCode extension system we are currently using to communicate.
+This context file explains **Prompt Foundry**, the VSCode extension system we are currently using to communicate.
 
 ## How It Works
-Prompt Forge allows me (the human) to rapidly assemble complex, contextual AI instructions by stacking a "Main Prompt" with a library of reusable building blocks (like this one). When I send a prompt, the extension compiles all active blocks, resolves any Liquid syntax variables, and passes the final markdown structure to you.
+Prompt Foundry allows me (the human) to rapidly assemble complex, contextual AI instructions by stacking a "Main Prompt" with a library of reusable building blocks (like this one). When I send a prompt, the extension compiles all active blocks, resolves any Liquid syntax variables, and passes the final markdown structure to you.
 
 ## Library States
-Prompt Forge operates in two states:
+Prompt Foundry operates in two states:
 1. **Read-Only (Default)**: Uses bundled templates. You can read, but not save/modify.
 2. **Editable (Initialized)**: Once a local "Prompt Library" folder is initialized (via the "Select Library Folder" feature), you gain full read/write access.
 
 ## The MCP Server
-Prompt Forge runs a local Model Context Protocol (MCP) server in the background. This server acts as a bridge, exposing the internal state and capabilities of the Prompt Forge extension directly to you, the AI agent.
+Prompt Foundry runs a local Model Context Protocol (MCP) server in the background. This server acts as a bridge, exposing the internal state and capabilities of the Prompt Foundry extension directly to you, the AI agent.
 
 ## Self-Improvement Loop (Updating Prompts)
 A core feature of this architecture is that **you have the ability to improve these very prompt templates.**

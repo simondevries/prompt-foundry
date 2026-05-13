@@ -121,7 +121,7 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               );
 
               vscode.window.showInformationMessage(
-                "Prompt Forge initialized successfully!",
+                "Prompt Foundry initialized successfully!",
               );
               this._promptManager.reload();
               this.refreshView();

@@ -2,8 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-console.log("Prompt Forge: Bundle execution started.");
-
 const mountApp = () => {
   try {
     const container = document.getElementById('root');

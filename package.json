@@ -1,36 +1,42 @@
 {
-  "name": "prompt-forge",
+  "name": "prompt-foundry",
   "publisher": "sdevries",
-  "displayName": "Prompt Forge",
+  "displayName": "Prompt Foundry",
   "description": "Forge complex AI prompts from a library of living blocks that update and evolve with your project.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "icon": "assets/150.png",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/simondevries/prompt-forge"
+    "url": "https://github.com/simondevries/prompt-foundry"
   },
   "keywords": [
     "prompt",
     "ai",
     "llm",
+    "mcp",
     "cursor",
-    "claude"
+    "claude",
+    "prompt-engineering"
   ],
   "engines": {
     "vscode": "^1.105.0"
   },
   "categories": [
-    "Other"
+    "AI",
+    "Programming Languages",
+    "Snippets"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:prompt-forge-sidebar"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
           "id": "prompt-forge-sidebar",
-          "title": "Prompt Forge",
+          "title": "Prompt Foundry",
           "icon": "assets/logo.svg"
         }
       ]
@@ -40,19 +46,19 @@
         {
           "type": "webview",
           "id": "prompt-forge.mainPrompt",
-          "name": "Prompt Forge",
+          "name": "Prompt Foundry",
           "icon": "$(edit)"
         }
       ]
     },
     "commands": [
       {
-        "command": "prompt-forge.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "prompt-forge.sendToAI",
         "title": "Send to AI"
+      },
+      {
+        "command": "prompt-forge.editPrompt",
+        "title": "Edit Prompt Block"
       }
     ],
     "configuration": {
@@ -66,12 +72,12 @@
         "promptForge.showClaudeCodeBlocks": {
           "type": "boolean",
           "default": false,
-          "description": "Show Claude Code skills, commands, and instructions as prompt blocks. DISCLAIMER: Enabling this allows Prompt Forge to read files from your .claude/ directory."
+          "description": "Show Claude Code skills, commands, and instructions as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .claude/ directory."
         },
         "promptForge.showCursorRules": {
           "type": "boolean",
           "default": false,
-          "description": "Show Cursor rules and .mdc files as prompt blocks. DISCLAIMER: Enabling this allows Prompt Forge to read files from your .cursor/ directory."
+          "description": "Show Cursor rules and .mdc files as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .cursor/ directory."
         },
         "promptForge.historyRetentionLimit": {
           "type": "number",

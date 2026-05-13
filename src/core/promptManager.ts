@@ -186,7 +186,7 @@ export class PromptManager {
     if (!this._fs.existsSync(currentPromptFile)) {
       const initialData: SessionData = {
         mainInstruction:
-          "# My First Prompt\n\nWelcome to Prompt Forge! Select blocks below to build your prompt.",
+          "# My First Prompt\n\nWelcome to Prompt Foundry! Select blocks below to build your prompt.",
         activeBlocks: [],
         timestamp: new Date().toISOString(),
         fileMap: {},

@@ -289,7 +289,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
            - A summary of the changes you've staged.
            - The path to the diff file for their reference.
         3. You MUST STOP and ask the user to review and accept the changes via one of these two methods:
-           a) Via the Prompt Forge extension banner (RECOMMENDED: Best for side-by-side diff review).
+           a) Via the Prompt Foundry extension banner (RECOMMENDED: Best for side-by-side diff review).
            b) By asking you to "Commit" directly here in the chat (Only if they are sure).
         4. DO NOT call 'commit_prompt_block_edit' until the user explicitly says "Yes" or "Commit".
 
@@ -387,7 +387,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Prompt Forge MCP server running on stdio");
+  console.error("Prompt Foundry MCP server running on stdio");
 }
 
 main().catch((error) => {

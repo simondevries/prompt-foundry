@@ -19,7 +19,6 @@ import * as path from "path";
 import * as os from "os";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("Prompt Forge extension is now active!");
 
   // Fallback to extension-bundled prompts if no custom folder configured
   const config = vscode.workspace.getConfiguration("promptForge");
@@ -181,7 +180,6 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
-  console.log("Prompt Forge extension activated successfully!");
 }
 
 export function deactivate() {}
