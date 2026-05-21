@@ -83,6 +83,20 @@
           "type": "number",
           "default": 50,
           "description": "Number of sessions to keep in history. 0 means unlimited."
+        },
+        "promptForge.mentionExcludeFolders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "node_modules",
+            "dist",
+            "out",
+            ".git",
+            ".pnpm-store"
+          ],
+          "description": "Folders to exclude from @ mention file search."
         }
       }
     }

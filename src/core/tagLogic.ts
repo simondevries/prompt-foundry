@@ -12,6 +12,7 @@ export interface SelectionChangedParams {
     fileMap: Record<string, string>;
     collidedNames: Record<string, boolean>;
     autoTagCount: number; // Add this
+    forceInsert?: boolean; // Add this
 }
 
 export interface SelectionChangedResult {
@@ -78,7 +79,7 @@ export function handleSelectionChange(params: SelectionChangedParams): Selection
     let currentCaretPos = caretPos;
 
     // 1. Check if the currently active tag matches this file
-    if (currentActiveTag) {
+    if (!params.forceInsert && currentActiveTag) {
         const tagAtPos = newText.substring(currentActiveTag.start, currentActiveTag.end);
         if (tagAtPos.startsWith(`[@${tagPath}`) && tagAtPos.endsWith('] ')) {
             matchToUpdate = {
@@ -89,7 +90,7 @@ export function handleSelectionChange(params: SelectionChangedParams): Selection
     }
 
     // 2. If not, check if any tag for this file exists at the current caret position
-    if (!matchToUpdate) {
+    if (!params.forceInsert && !matchToUpdate) {
         const matches = Array.from(newText.matchAll(existingTagRegex));
         const matchAtCaret = matches.find(m => {
             const start = m.index!;
@@ -128,8 +129,8 @@ export function handleSelectionChange(params: SelectionChangedParams): Selection
             wasInserted: false
         };
     } else {
-        // Insert fresh - BUT only if we haven't hit the limit
-        if (autoTagCount >= 4) {
+        // Insert fresh - BUT only if we haven't hit the limit (unless forced)
+        if (!params.forceInsert && autoTagCount >= 4) {
             return {
                 newText: currentText,
                 newActiveTag: activeTag,

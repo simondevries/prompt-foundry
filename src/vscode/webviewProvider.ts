@@ -661,6 +661,33 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
             }
           }
           break;
+        case "addCurrentFileTag":
+          const editorForCamera = vscode.window.activeTextEditor;
+          if (editorForCamera) {
+            let filePath = editorForCamera.document.uri.fsPath;
+            const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+              editorForCamera.document.uri,
+            );
+            if (workspaceFolder) {
+              filePath = path.relative(workspaceFolder.uri.fsPath, filePath);
+            }
+            const selection = editorForCamera.selection;
+            let lines = "";
+            if (!selection.isEmpty) {
+              const startLine = selection.start.line + 1;
+              const endLine = selection.end.line + 1;
+              lines =
+                startLine === endLine ? `${startLine}` : `${startLine}-${endLine}`;
+            }
+            this.view?.webview.postMessage({
+              type: "insertFileTag",
+              path: filePath,
+              lines: lines,
+            });
+          } else {
+            vscode.window.showInformationMessage("No active editor found to add.");
+          }
+          break;
         case "commitProposedEdit":
           try {
             this._promptManager.commitBlock(data.id);
@@ -690,6 +717,16 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
             vscode.window.showErrorMessage(data.message);
           }
           break;
+        case "searchMentions":
+          if (data.filterString !== undefined) {
+            const results = await this._searchMentions(data.filterString);
+            this.view?.webview.postMessage({
+              type: "mentionSearchResults",
+              results: results,
+              requestId: data.requestId,
+            });
+          }
+          break;
         case "showInputBox":
           const input = await vscode.window.showInputBox({
             prompt: data.prompt,
@@ -706,6 +743,65 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           break;
       }
     });
+  }
+
+  private async _searchMentions(filterString: string) {
+    const results: any[] = [];
+
+    // Search Workspace Files
+    if (filterString.length >= 1) {
+      // Create a case-insensitive glob pattern: readme -> [rR][eE][aA][dD][mM][eE]
+      const caseInsensitiveFilter = filterString
+        .split("")
+        .map((char) => {
+          if (/[a-zA-Z]/.test(char)) {
+            return `[${char.toLowerCase()}${char.toUpperCase()}]`;
+          }
+          return char;
+        })
+        .join("");
+
+      const searchPattern = `**/*${caseInsensitiveFilter}*`;
+
+      // Get excluded folders from settings
+      const config = vscode.workspace.getConfiguration("promptForge");
+      const excludedFolders = config.get<string[]>("mentionExcludeFolders", [
+        "node_modules",
+        "dist",
+        "out",
+        ".git",
+        ".pnpm-store",
+      ]);
+
+      const excludePattern = `{${excludedFolders.map((f) => `**/${f}/**`).join(",")}}`;
+
+      const files = await vscode.workspace.findFiles(
+        searchPattern,
+        excludePattern,
+        50,
+      );
+
+      const lowerFilter = filterString.toLowerCase();
+      for (const file of files) {
+        const relativePath = vscode.workspace.asRelativePath(file);
+        if (relativePath.toLowerCase().includes(lowerFilter)) {
+          const fileName = path.basename(file.fsPath);
+          const dirPath = path.dirname(relativePath);
+
+          results.push({
+            type: "file",
+            name: fileName,
+            path: dirPath === "." ? "" : dirPath,
+            fullPath: relativePath,
+            label: relativePath,
+            icon: "file",
+          });
+        }
+        if (results.length >= 20) break;
+      }
+    }
+
+    return results;
   }
 
   private async _addProblemsContextToPrompt() {

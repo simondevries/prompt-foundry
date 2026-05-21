@@ -10,6 +10,12 @@ interface LiquidVariablesFormProps {
   onBack: () => void;
 }
 
+const formatLabel = (key: string): string => {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 const LiquidVariablesForm: React.FC<LiquidVariablesFormProps> = ({
   category,
   name,
@@ -112,7 +118,7 @@ const LiquidVariablesForm: React.FC<LiquidVariablesFormProps> = ({
       <input
         key={key}
         type="text"
-        placeholder={`Enter value for ${key}`}
+        placeholder={`Enter value for ${formatLabel(key)}`}
         value={values[key] || ""}
         onChange={(e) => handleInputChange(key, e.target.value)}
       />
@@ -134,7 +140,7 @@ const LiquidVariablesForm: React.FC<LiquidVariablesFormProps> = ({
       {schema &&
         Object.entries(schema).map(([key, config]) => (
           <div key={key} className="form-group">
-            <label>{key}</label>
+            <label>{formatLabel(key)}</label>
             {renderField(key, config)}
           </div>
         ))}

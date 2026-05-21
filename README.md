@@ -3,13 +3,12 @@
   <h1>Prompt Foundry</h1>
 </div>
 
-Prompt Foundry is an extension for vscode and forks (cursor/antigravity) to more rapidly build more effective prompts. It provides a prompt library, tooling, templates, and a self-learning library of living blocks that update and evolve with your project, which AI can automatically improve at the end of the conversation.
+Prompt Foundry is an extension for vscode and forks (cursor/antigravity) to more rapidly build more effective prompts. It provides a prompt library, tooling, templates, and a self-learning library of evolving prompt blocks that you updated at the end of your task.
 
-Prompt foundry ensures you get the most out of AI by writing better prompts and helps provide guiderails for how AI should operate. This extension allows you to:
+Benefits:
 
 * **Compile prompt blocks** to construct a clear set of instructions and context.
-  *Benefit:* Provide the right instructions and context for the task at hand.
-  *Benefit:* Move information that is irrelevant for the current task out of agents.md and skills and reduce context bloat.
+  *Benefit:* Provide more targetted information, with specific details for the task. Reduce bloated agents.md files
 * **Build and evolve a knowledge library** with your project. Prompt foundry comes with a local MCP server to let AI update your prompt block library at the end of the conversation.
   *Benefit:* Knowledge library that stays up to date. AI has information for the task.
 * **Specify key goals** for the AI to keep it on track. Use AI contracts to steer the AI towards specific behaviours.

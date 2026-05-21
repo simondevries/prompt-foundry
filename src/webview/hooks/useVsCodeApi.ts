@@ -185,6 +185,41 @@ export function useVsCodeApi() {
             };
           });
           break;
+        case "insertFileTag":
+          setState(prev => {
+            const result = handleSelectionChange({
+                currentText: prev.mainInstruction || '',
+                path: message.path,
+                lines: message.lines,
+                caretPos: prev.lastCaretPosition,
+                activeTag: prev.activeTag,
+                fileMap: prev.fileMap || {},
+                collidedNames: prev.collidedNames || {},
+                autoTagCount: prev.autoTagCount || 0,
+                forceInsert: true
+            });
+
+            if (vscode.current) {
+                vscode.current.postMessage({ 
+                    type: 'updateMainInstruction', 
+                    value: result.newText, 
+                    fileMap: result.fileMap, 
+                    collidedNames: result.collidedNames 
+                });
+                vscode.current.postMessage({ type: 'saveMainInstruction' });
+            }
+
+            return {
+              ...prev,
+              mainInstruction: result.newText,
+              activeTag: result.newActiveTag,
+              lastCaretPosition: result.newCaretPos,
+              fileMap: result.fileMap,
+              collidedNames: result.collidedNames,
+              autoTagCount: result.wasInserted ? (prev.autoTagCount + 1) : prev.autoTagCount
+            };
+          });
+          break;
       }
     };
 

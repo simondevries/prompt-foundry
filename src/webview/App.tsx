@@ -11,6 +11,9 @@ import SuggestedBlock from "./components/SuggestedBlock";
 import { FeaturesPermissionsPopover } from "./components/FeaturesPermissionsPopover";
 import { Banner } from "./components/Banner";
 import { TEMPLATES, Template } from "./constants/templates";
+import { useMentions } from "./hooks/useMentions";
+import MentionDropdown, { MentionResult } from "./components/MentionDropdown";
+import { handleSelectionChange } from "../core/tagLogic";
 
 const App: React.FC = () => {
   const { state, postMessage, updateState, initialized } = useVsCodeApi();
@@ -60,6 +63,61 @@ const App: React.FC = () => {
 
   const [showRestore, setShowRestore] = useState(false);
 
+  const {
+    mentionState,
+    mentionResults,
+    selectedIndex,
+    updateMentions,
+    handleMentionKeyDown,
+    closeMentions,
+    insertMention,
+    setMentionResults,
+  } = useMentions(postMessage, (result, startIndex) => {
+    const text = state.mainInstruction;
+    const caretPos = promptInputRef.current?.selectionStart || startIndex;
+
+    // 1. Remove the trigger and filter (from startIndex to caretPos)
+    const textWithoutTrigger =
+      text.substring(0, startIndex) + text.substring(caretPos);
+
+    // 2. Use handleSelectionChange to insert the tag with smart name logic
+    const result_ = handleSelectionChange({
+      currentText: textWithoutTrigger,
+      path: result.fullPath,
+      lines: "",
+      caretPos: startIndex,
+      activeTag: null,
+      fileMap: state.fileMap || {},
+      collidedNames: state.collidedNames || {},
+      autoTagCount: state.autoTagCount || 0,
+      forceInsert: true,
+    });
+
+    updateState({
+      mainInstruction: result_.newText,
+      fileMap: result_.fileMap,
+      collidedNames: result_.collidedNames,
+      autoTagCount: result_.wasInserted
+        ? state.autoTagCount + 1
+        : state.autoTagCount,
+    });
+
+    postMessage({
+      type: "updateMainInstruction",
+      value: result_.newText,
+      fileMap: result_.fileMap,
+      collidedNames: result_.collidedNames,
+    });
+
+    setTimeout(() => {
+      if (promptInputRef.current) {
+        promptInputRef.current.selectionStart =
+          promptInputRef.current.selectionEnd = result_.newCaretPos;
+        promptInputRef.current.focus();
+      }
+    }, 0);
+  });
+
   // Close overlays on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -95,13 +153,21 @@ const App: React.FC = () => {
     e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const newVal = e.target.value;
+    const caretPos = e.target.selectionStart;
     updateState({ mainInstruction: newVal, autoTagCount: 0 });
     setShowRestore(false);
+
+    updateMentions(newVal, caretPos, e.target);
 
     // Debounced sync for extension state (which also auto-saves to current_instruction_prompt.json)
     clearAutoSaveTimers();
     debounceTimer.current = setTimeout(() => {
-      postMessage({ type: "updateMainInstruction", value: newVal });
+      postMessage({
+        type: "updateMainInstruction",
+        value: newVal,
+        fileMap: state.fileMap,
+        collidedNames: state.collidedNames,
+      });
       console.log("Syncing and auto-saving main instruction");
     }, 1000);
   };
@@ -316,26 +382,47 @@ const App: React.FC = () => {
             />
           </div>
 
-          <IconButton
-            id="followBtn"
-            icon={state.followActiveFile ? "record" : "zap"}
-            title={
-              state.followActiveFile
-                ? "Live Focus: Automatically add selected file in editor to prompt (ON - RECORDING)"
-                : "Live Focus: Automatically add selected file in editor to prompt (OFF)"
-            }
-            onClick={() =>
-              updateState({ followActiveFile: !state.followActiveFile })
-            }
-            style={{
-              backgroundColor: state.followActiveFile
-                ? "darkred"
-                : "transparent",
-              color: state.followActiveFile ? "white" : "inherit",
-              borderRadius: "4px",
-              marginLeft: "4px",
-            }}
-          />
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            backgroundColor: "var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.1))",
+            border: "1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2))",
+            borderRadius: "4px",
+            marginLeft: "6px",
+            marginRight: "2px",
+            padding: "2px",
+            gap: "2px"
+          }}>
+            <IconButton
+              id="followBtn"
+              icon={state.followActiveFile ? "record" : "zap"}
+              title={
+                state.followActiveFile
+                  ? "Live Focus: Automatically add selected file in editor to prompt (ON - RECORDING)"
+                  : "Live Focus: Automatically add selected file in editor to prompt (OFF)"
+              }
+              onClick={() =>
+                updateState({ followActiveFile: !state.followActiveFile })
+              }
+              style={{
+                backgroundColor: state.followActiveFile
+                  ? "darkred"
+                  : "transparent",
+                color: state.followActiveFile ? "white" : "inherit",
+                borderRadius: "2px",
+              }}
+            />
+            <div style={{ width: "1px", height: "14px", backgroundColor: "var(--vscode-widget-border, rgba(128, 128, 128, 0.2))" }} />
+            <IconButton
+              id="cameraBtn"
+              icon="device-camera"
+              title="Add current file to prompt"
+              onClick={() => postMessage({ type: "addCurrentFileTag" })}
+              style={{
+                borderRadius: "2px",
+              }}
+            />
+          </div>
           <IconButton
             id="newPromptBtn"
             icon="new-file"
@@ -548,10 +635,26 @@ const App: React.FC = () => {
                 id="mainInstructionInput"
                 value={state.mainInstruction}
                 onChange={handleMainInstructionChange}
-                onClick={checkAndSetCaret}
-                onKeyUp={checkAndSetCaret}
+                onClick={(e) => {
+                  checkAndSetCaret();
+                  updateMentions(
+                    state.mainInstruction,
+                    (e.target as HTMLTextAreaElement).selectionStart,
+                    e.target as HTMLTextAreaElement,
+                  );
+                }}
+                onKeyUp={(e) => {
+                  checkAndSetCaret();
+                  updateMentions(
+                    state.mainInstruction,
+                    (e.target as HTMLTextAreaElement).selectionStart,
+                    e.target as HTMLTextAreaElement,
+                  );
+                }}
                 onFocus={checkAndSetCaret}
                 onKeyDown={(e) => {
+                  if (handleMentionKeyDown(e)) return;
+
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                     e.preventDefault();
                     const currentActionType =
@@ -587,6 +690,18 @@ const App: React.FC = () => {
                 }}
                 placeholder="Type your main instructions here..."
               ></textarea>
+
+              {mentionState.isActive && (
+                <MentionDropdown
+                  results={mentionResults}
+                  selectedIndex={selectedIndex}
+                  anchorElement={promptInputRef.current}
+                  onSelect={(result) =>
+                    insertMention(result, mentionState.startIndex!)
+                  }
+                />
+              )}
+
               {!state.milestones?.["used_hotkey"] && (
                 <div
                   style={{
