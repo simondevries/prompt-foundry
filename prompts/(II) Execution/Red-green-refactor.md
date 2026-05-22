@@ -1,4 +1,5 @@
 <!-- 
+# version: 1.0
 # ReferenceLocation: workflowEveryChange
 # Reference: Follow the Red-Green-Refactor TDD cycle as per "{{blockName}}"
 -->

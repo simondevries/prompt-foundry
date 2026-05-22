@@ -1,4 +1,5 @@
 <!-- 
+# version: 1.0
 # ReferenceLocation: workflowEndOfTask
 # Reference: Ensure there are no errors in the updated project code as per "{{blockName}}"
 -->

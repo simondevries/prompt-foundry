@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowFirstTurn
 # Reference: In your first response, report any conflicting instructions before proceeding, as per "{{blockName}}"
 -->

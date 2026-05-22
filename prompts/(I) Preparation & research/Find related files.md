@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Trace all related files and dependencies before making changes, as per "{{blockName}}"
 -->

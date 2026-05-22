@@ -18,6 +18,7 @@ vars:
     ]
 {% endcomment %}
 <!-- 
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Refactor the code according to the "{{ refactor_type }}" type as per "{{blockName}}"
 -->

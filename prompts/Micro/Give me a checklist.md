@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Output a detailed implementation checklist instead of writing code, as per "{{blockName}}"
 -->

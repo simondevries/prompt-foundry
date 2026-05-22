@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: remark
 # Reference: Add debug logging throughout modified code, as per "{{blockName}}"
 -->

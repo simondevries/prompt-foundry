@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Explain how the relevant code works before making changes, as per "{{blockName}}"
 -->

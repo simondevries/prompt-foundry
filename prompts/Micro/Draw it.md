@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: remark
 # Reference: Generate a Mermaid diagram to visualize the concept, as per "{{blockName}}"
 -->

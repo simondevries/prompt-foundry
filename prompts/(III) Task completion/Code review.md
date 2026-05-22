@@ -11,6 +11,7 @@ options: [
 {% endcomment %}
 
 <!--
+# version: 1.0
 # ReferenceLocation: workflowEndOfTask
 # Reference: Present a code review report of the {{ review_source }} as per "{{blockName}}"
 -->

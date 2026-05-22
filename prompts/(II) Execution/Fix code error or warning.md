@@ -1,4 +1,5 @@
 <!-- 
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Resolve the code error, lint warning, or type error as per "{{blockName}}"
 -->

@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: remark
 # Reference: Restrict all edits to the primary active file only, as per "{{blockName}}"
 -->

@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: remark
 # Reference: Take a critical adversarial stance — find flaws, edge cases and bottlenecks, as per "{{blockName}}"
 -->

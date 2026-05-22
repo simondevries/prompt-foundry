@@ -6,6 +6,7 @@ vars:
     label: "Template to improve (e.g., Category: [Category], Name: [name.md])"
 {% endcomment %}
 <!-- 
+# version: 1.0
 # ReferenceLocation: workflow
 # Reference: Run a self-improvement loop on the "{{ target_template }}" template as per "{{blockName}}"
 -->

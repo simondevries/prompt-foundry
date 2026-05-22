@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowEndOfTask
 # Reference: Suggest improvements for prompting and tool usage as per "{{blockName}}"
 -->

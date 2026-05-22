@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: remark
 # Reference: Output code blocks only — no prose or explanation, as per "{{blockName}}"
 -->
