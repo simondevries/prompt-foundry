@@ -85,14 +85,14 @@ const App: React.FC = () => {
     // 2. Use handleSelectionChange to insert the tag with smart name logic
     const result_ = handleSelectionChange({
       currentText: textWithoutTrigger,
-      path: result.fullPath,
+      path: result.fullPath ?? '',
       lines: "",
       caretPos: startIndex,
-      activeTag: null,
       fileMap: state.fileMap || {},
       collidedNames: state.collidedNames || {},
       autoTagCount: state.autoTagCount || 0,
       forceInsert: true,
+      activeTag: null,
     });
 
     updateState({
@@ -143,7 +143,7 @@ const App: React.FC = () => {
       else if (result.name === "send") handleSend();
       else if (result.name === "file") handleAddCurrentFile();
       else if (result.name === "clear") handleClear();
-    } else if (result.isGroup) {
+    } else if (result.isGroup || false) {
       handleAddGroup(result.name);
     } else {
       postMessage({
@@ -209,7 +209,7 @@ const App: React.FC = () => {
     updateState({ mainInstruction: newVal, autoTagCount: 0 });
     setShowRestore(false);
 
-    updateMentions(newVal, caretPos, e.target);
+    updateMentions(newVal, caretPos);
 
     // Debounced sync for extension state (which also auto-saves to current_instruction_prompt.json)
     clearAutoSaveTimers();
@@ -731,7 +731,6 @@ const App: React.FC = () => {
                   updateMentions(
                     state.mainInstruction,
                     (e.target as HTMLTextAreaElement).selectionStart,
-                    e.target as HTMLTextAreaElement,
                   );
                 }}
                 onKeyUp={(e) => {
@@ -739,7 +738,6 @@ const App: React.FC = () => {
                   updateMentions(
                     state.mainInstruction,
                     (e.target as HTMLTextAreaElement).selectionStart,
-                    e.target as HTMLTextAreaElement,
                   );
                   updateCommands(
                     state.mainInstruction,
@@ -779,7 +777,7 @@ const App: React.FC = () => {
                     }
                   }
                 }}
-                placeholder="Type your main instructions here... Slash '/' for commands, '@' to mention files."
+                placeholder="Type your main instructions here...\n '/' for commands, '@' to mention files."
               ></textarea>
 
               {mentionState.isActive && (

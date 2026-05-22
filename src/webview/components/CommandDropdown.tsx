@@ -8,6 +8,7 @@ export interface CommandResult {
     fullPath?: string;
     label: string;
     icon: string;
+    isGroup?: boolean;
 }
 
 interface CommandDropdownProps {
