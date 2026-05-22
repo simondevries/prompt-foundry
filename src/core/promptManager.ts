@@ -137,15 +137,72 @@ export class PromptManager {
     return !resolvedPath.startsWith(resolvedExtensionPath);
   }
 
-  public resetPrompts(): void {
-    if (!this._extensionDir) {
-      throw new Error("Extension directory not set.");
+  public initializePromptFolder(targetDir: string, sampleDir: string): void {
+    if (!this._fs.existsSync(targetDir)) {
+      this._fs.mkdirSync(targetDir, { recursive: true });
     }
-    const sampleDir = path.join(this._extensionDir, "prompts");
-    if (!this._fs.existsSync(sampleDir)) {
-      throw new Error("Bundled templates directory not found.");
+
+    const copyRecursiveSync = (src: string, dest: string) => {
+      // Security: src (sampleDir) might be outside sandbox, dest must be inside.
+      const stats = fs.existsSync(src) ? fs.statSync(src) : null;
+      if (stats && stats.isDirectory()) {
+        if (!this._fs.existsSync(dest)) {
+          this._fs.mkdirSync(dest);
+        }
+        fs.readdirSync(src).forEach((childItemName) => {
+          copyRecursiveSync(
+            path.join(src, childItemName),
+            path.join(dest, childItemName),
+          );
+        });
+      } else {
+        const safeDest = this._fs.resolve(dest);
+        fs.copyFileSync(src, safeDest);
+      }
+    };
+
+    if (fs.existsSync(sampleDir)) {
+      const items = fs.readdirSync(sampleDir);
+      for (const item of items) {
+        copyRecursiveSync(
+          path.join(sampleDir, item),
+          path.join(targetDir, item),
+        );
+      }
     }
-    this.initializePromptFolder(this._promptBuilderDir, sampleDir);
+
+    const currentPromptFile = getCurrentInstructionPromptFile(targetDir);
+    const systemDir = path.dirname(currentPromptFile);
+    if (!this._fs.existsSync(systemDir)) {
+      this._fs.mkdirSync(systemDir, { recursive: true });
+    }
+
+    const oldStylesFile = path.join(targetDir, "styles.json");
+    const newStylesFile = getStylesFile(targetDir);
+    if (this._fs.existsSync(oldStylesFile) && !this._fs.existsSync(newStylesFile)) {
+      this._fs.renameSync(oldStylesFile, newStylesFile);
+    }
+
+    if (!this._fs.existsSync(currentPromptFile)) {
+      const initialData: SessionData = {
+        mainInstruction:
+          "# My First Prompt\n\nWelcome to Prompt Foundry! Select blocks below to build your prompt.",
+        activeBlocks: [],
+        timestamp: new Date().toISOString(),
+        fileMap: {},
+        collidedNames: {},
+      };
+      this._fs.writeFileSync(
+        currentPromptFile,
+        JSON.stringify(initialData, null, 2),
+        "utf8",
+      );
+    }
+
+    this.setPromptBuilderDir(targetDir);
+    if (this._enableNativeWatcher) {
+      this.setupNativeWatcher();
+    }
   }
 
   public setPromptBuilderDir(dir: string) {
