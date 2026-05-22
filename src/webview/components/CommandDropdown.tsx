@@ -1,27 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 
-export interface MentionResult {
-    type: 'block' | 'file';
+export interface CommandResult {
+    type: 'block' | 'file' | 'action';
     name: string;
     category?: string;
-    path: string;
-    fullPath: string;
+    path?: string;
+    fullPath?: string;
     label: string;
     icon: string;
 }
 
-interface MentionDropdownProps {
-    results: MentionResult[];
+interface CommandDropdownProps {
+    results: CommandResult[];
     selectedIndex: number;
-    onSelect: (result: MentionResult) => void;
+    onSelect: (result: CommandResult) => void;
     anchorElement: HTMLElement | null;
+    title: string;
 }
 
-const MentionDropdown: React.FC<MentionDropdownProps> = ({ 
+const CommandDropdown: React.FC<CommandDropdownProps> = ({ 
     results, 
     selectedIndex, 
     onSelect, 
-    anchorElement 
+    anchorElement,
+    title
 }) => {
     const listRef = useRef<HTMLDivElement>(null);
     const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -52,7 +54,11 @@ const MentionDropdown: React.FC<MentionDropdownProps> = ({
                 display: 'block',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
                 border: '1px solid var(--vscode-widget-border)',
-                zIndex: 2000
+                zIndex: 2000,
+                backgroundColor: 'var(--vscode-menu-background)',
+                color: 'var(--vscode-menu-foreground)',
+                borderRadius: '4px',
+                overflow: 'hidden'
             }}
         >
             <div style={{ 
@@ -62,14 +68,15 @@ const MentionDropdown: React.FC<MentionDropdownProps> = ({
                 textTransform: 'uppercase',
                 borderBottom: '1px solid var(--vscode-widget-border)',
                 background: 'var(--vscode-menu-background)',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                letterSpacing: '0.5px'
             }}>
-                Files
+                {title}
             </div>
             <div ref={listRef} style={{ maxHeight: '200px', overflowY: 'auto' }}>
                 {results.map((result, index) => (
                     <div 
-                        key={`${result.type}:${result.path}`}
+                        key={`${result.type}:${result.name}:${result.path || ''}:${index}`}
                         ref={el => { itemRefs.current[index] = el; }}
                         className="history-item"
                         style={{
@@ -77,18 +84,24 @@ const MentionDropdown: React.FC<MentionDropdownProps> = ({
                             color: index === selectedIndex ? 'var(--vscode-list-activeSelectionForeground)' : 'inherit',
                             padding: '6px 10px',
                             minHeight: 'auto',
-                            borderBottom: 'none'
+                            borderBottom: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            textAlign: 'left'
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
                             onSelect(result);
                         }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                            <span className={`codicon codicon-${result.icon}`} style={{ fontSize: '14px', flexShrink: 0 }}></span>
-                            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
-                                <strong>{result.name}</strong>{result.path && ` - `}<span style={{ opacity: 0.7, fontSize: '10px' }}>{result.path}</span>
-                            </div>
+                        <span className={`codicon codicon-${result.icon}`} style={{ fontSize: '14px', flexShrink: 0, opacity: index === selectedIndex ? 1 : 0.7 }}></span>
+                        <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px', textAlign: 'left' }}>
+                            <strong style={{ fontWeight: 600 }}>{result.label}</strong>
+                            {result.path && (
+                                <span style={{ opacity: 0.5, fontSize: '10px', marginLeft: '6px' }}>{result.path}</span>
+                            )}
                         </div>
                     </div>
                 ))}
@@ -97,4 +110,4 @@ const MentionDropdown: React.FC<MentionDropdownProps> = ({
     );
 };
 
-export default MentionDropdown;
+export default CommandDropdown;

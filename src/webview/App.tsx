@@ -12,7 +12,9 @@ import { FeaturesPermissionsPopover } from "./components/FeaturesPermissionsPopo
 import { Banner } from "./components/Banner";
 import { TEMPLATES, Template } from "./constants/templates";
 import { useMentions } from "./hooks/useMentions";
-import MentionDropdown, { MentionResult } from "./components/MentionDropdown";
+import { useSlashCommands } from "./hooks/useSlashCommands";
+import { useAppActions } from "./hooks/useAppActions";
+import CommandDropdown, { CommandResult } from "./components/CommandDropdown";
 import { handleSelectionChange } from "../core/tagLogic";
 
 const App: React.FC = () => {
@@ -118,6 +120,41 @@ const App: React.FC = () => {
     }, 0);
   });
 
+  const {
+    commandState,
+    commandResults,
+    selectedIndex: commandSelectedIndex,
+    updateCommands,
+    handleKeyDown: handleCommandKeyDown,
+    closeCommands,
+  } = useSlashCommands(
+    postMessage,
+    (result: CommandResult) => {
+        const text = state.mainInstruction;
+        const startIndex = commandState.startIndex!;
+        const caretPos = promptInputRef.current?.selectionStart || text.length;
+
+        // 1. Clear the command text
+        const newText = text.substring(0, startIndex) + text.substring(caretPos);
+        updateState({ mainInstruction: newText });
+        postMessage({ type: "updateMainInstruction", value: newText });
+
+        // 2. Execute the result
+        if (result.type === 'action') {
+            if (result.name === 'copy') handleCopy();
+            else if (result.name === 'send') handleSend();
+            else if (result.name === 'file') handleAddCurrentFile();
+            else if (result.name === 'clear') handleClear();
+        } else if (result.isGroup) {
+            handleAddGroup(result.name);
+        } else {
+            postMessage({ type: "addBlock", category: result.category || 'Tools', file: result.name });
+        }
+        
+        setTimeout(() => promptInputRef.current?.focus(), 0);
+    }
+  );
+
   // Close overlays on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -144,10 +181,24 @@ const App: React.FC = () => {
   // Debounce helper for main instruction updates
   const debounceTimer = useRef<any>(null);
   const saveTimer = useRef<any>(null);
-  const clearAutoSaveTimers = () => {
+  const clearAutoSaveTimers = useCallback(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     if (saveTimer.current) clearTimeout(saveTimer.current);
-  };
+  }, []);
+
+  const {
+    handleCopy,
+    handleSend,
+    handleClear,
+    handleAddCurrentFile,
+    handleAddGroup
+  } = useAppActions({
+    postMessage,
+    updateState,
+    state,
+    clearAutoSaveTimers,
+    setShowRestore
+  });
 
   const handleMainInstructionChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
@@ -168,7 +219,6 @@ const App: React.FC = () => {
         fileMap: state.fileMap,
         collidedNames: state.collidedNames,
       });
-      console.log("Syncing and auto-saving main instruction");
     }, 1000);
   };
 
@@ -417,7 +467,7 @@ const App: React.FC = () => {
               id="cameraBtn"
               icon="device-camera"
               title="Add current file to prompt"
-              onClick={() => postMessage({ type: "addCurrentFileTag" })}
+              onClick={handleAddCurrentFile}
               style={{
                 borderRadius: "2px",
               }}
@@ -435,9 +485,7 @@ const App: React.FC = () => {
                   message:
                     "This will clear the current main instruction and remove all active blocks.",
                   onConfirm: () => {
-                    updateState({ mainInstruction: "" });
-                    postMessage({ type: "updateMainInstruction", value: "" });
-                    postMessage({ type: "deleteAllPrompts" });
+                    handleClear();
                     setConfirmModal((prev) => ({ ...prev, open: false }));
                   },
                 });
@@ -650,10 +698,29 @@ const App: React.FC = () => {
                     (e.target as HTMLTextAreaElement).selectionStart,
                     e.target as HTMLTextAreaElement,
                   );
+                  updateCommands(
+                    state.mainInstruction,
+                    (e.target as HTMLTextAreaElement).selectionStart,
+                  );
                 }}
                 onFocus={checkAndSetCaret}
                 onKeyDown={(e) => {
-                  if (handleMentionKeyDown(e)) return;
+                  if (handleMentionKeyDown(e)) {
+                    e.stopPropagation();
+                    return;
+                  }
+                  if (handleCommandKeyDown(e)) {
+                    e.stopPropagation();
+                    return;
+                  }
+
+                  if (e.key === "Escape") {
+                    closeMentions();
+                    closeCommands();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
 
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                     e.preventDefault();
@@ -663,28 +730,9 @@ const App: React.FC = () => {
                         ? "send"
                         : "copy");
                     if (currentActionType === "send") {
-                      postMessage({
-                        type: "updateMainInstruction",
-                        value: state.mainInstruction,
-                      });
-                      postMessage({ type: "sendPrompt" });
-                      updateState({ lastAction: "send" });
-                      reachMilestone("copied_or_sent");
-                      reachMilestone("used_hotkey");
+                      handleSend();
                     } else {
-                      postMessage({
-                        type: "updateMainInstruction",
-                        value: state.mainInstruction,
-                      });
-                      postMessage({ type: "copyPrompt" });
-                      updateState({ lastAction: "copy" });
-                      reachMilestone("copied_or_sent");
-                      reachMilestone("used_hotkey");
-                    }
-                    clearAutoSaveTimers();
-                    if (state.isUserInitializedLibrary) {
-                      postMessage({ type: "clearAndResetUI" });
-                      setShowRestore(true);
+                      handleCopy();
                     }
                   }
                 }}
@@ -692,13 +740,48 @@ const App: React.FC = () => {
               ></textarea>
 
               {mentionState.isActive && (
-                <MentionDropdown
-                  results={mentionResults}
+                <CommandDropdown
+                  title="Files"
+                  results={mentionResults as CommandResult[]}
                   selectedIndex={selectedIndex}
                   anchorElement={promptInputRef.current}
                   onSelect={(result) =>
-                    insertMention(result, mentionState.startIndex!)
+                    insertMention(result as any, mentionState.startIndex!)
                   }
+                />
+              )}
+
+              {commandState.isActive && (
+                <CommandDropdown
+                  title="Commands"
+                  results={commandResults as CommandResult[]}
+                  selectedIndex={commandSelectedIndex}
+                  anchorElement={promptInputRef.current}
+                  onSelect={(result) => {
+                      if (result.type === 'action') {
+                        if (result.name === 'copy') handleCopy();
+                        else if (result.name === 'send') handleSend();
+                        else if (result.name === 'file') handleAddCurrentFile();
+                        else if (result.name === 'clear') handleClear();
+                      } else if (result.icon === 'list-tree' || result.label.startsWith('Group:')) {
+                        // It's a group
+                        postMessage({ type: "selectAgent", agent: result.name });
+                      } else {
+                        // It's a block
+                        postMessage({ type: "addBlock", category: result.category || 'Tools', file: result.name });
+                      }
+                      
+                      // Remove the command text from the textarea
+                      const text = state.mainInstruction;
+                      const startIndex = commandState.startIndex!;
+                      const caretPos = promptInputRef.current?.selectionStart || text.length;
+                      const newText = text.substring(0, startIndex) + text.substring(caretPos);
+                      updateState({ mainInstruction: newText });
+                      postMessage({ type: "updateMainInstruction", value: newText });
+
+                      closeCommands();
+                      setTimeout(() => promptInputRef.current?.focus(), 0);
+                  }}
                 />
               )}
 
@@ -782,35 +865,6 @@ const App: React.FC = () => {
               (state.appName.toLowerCase().includes("cursor")
                 ? "send"
                 : "copy");
-            const handleCopy = () => {
-              postMessage({
-                type: "updateMainInstruction",
-                value: state.mainInstruction,
-              });
-              postMessage({ type: "copyPrompt" });
-              updateState({ lastAction: "copy" });
-              reachMilestone("copied_or_sent");
-              clearAutoSaveTimers();
-              if (state.isUserInitializedLibrary) {
-                postMessage({ type: "clearAndResetUI" });
-                setShowRestore(true);
-              }
-            };
-
-            const handleSend = () => {
-              postMessage({
-                type: "updateMainInstruction",
-                value: state.mainInstruction,
-              });
-              postMessage({ type: "sendPrompt" });
-              updateState({ lastAction: "send" });
-              reachMilestone("copied_or_sent");
-              clearAutoSaveTimers();
-              if (state.isUserInitializedLibrary) {
-                postMessage({ type: "clearAndResetUI" });
-                setShowRestore(true);
-              }
-            };
 
             const handleMcpInfo = () => {
               postMessage({ type: "getMcpConfig" });
@@ -1262,7 +1316,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <script>console.log("Hello")</script>
 
       {/* MODAL: GROUP CREATION */}
       {groupModal.open && (

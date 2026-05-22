@@ -1,35 +1,48 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { TriggerLogic, TriggerLogicState } from '../../core/TriggerLogic';
-import { MentionResult } from '../components/MentionDropdown';
+import { CommandResult } from '../components/CommandDropdown';
 
 export function useMentions(
     postMessage: (msg: any) => void,
-    onInsert: (result: MentionResult, startIndex: number) => void
+    onInsert: (result: CommandResult, startIndex: number) => void
 ) {
     const [mentionState, setMentionState] = useState<TriggerLogicState>({
         isActive: false,
         filterString: '',
-        startIndex: null
+        startIndex: null,
+        triggerChar: null
     });
-    const [mentionResults, setMentionResults] = useState<MentionResult[]>([]);
+    const [mentionResults, setMentionResults] = useState<CommandResult[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const didUserClose = useRef(false);
     
-    const triggerRef = useRef(new TriggerLogic());
+    const triggerRef = useRef(new TriggerLogic(['@']));
     const debounceTimer = useRef<any>(null);
     const lastRequestId = useRef<number>(0);
 
     const closeMentions = useCallback(() => {
-        setMentionState({ isActive: false, filterString: '', startIndex: null });
+        setMentionState({ isActive: false, filterString: '', startIndex: null, triggerChar: null });
         setMentionResults([]);
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
     }, []);
 
-    const insertMention = useCallback((result: MentionResult, startIndex: number) => {
+    const insertMention = useCallback((result: CommandResult, startIndex: number) => {
         onInsert(result, startIndex);
         closeMentions();
     }, [onInsert, closeMentions]);
 
-    const updateMentions = useCallback((text: string, caretPos: number, textarea: HTMLTextAreaElement) => {
+    const updateMentions = useCallback((text: string, caretPos: number) => {
+        if (mentionState.isActive) {
+            didUserClose.current = false;
+        }
+
+        if (didUserClose.current) {
+            if (caretPos === 0 || text[caretPos - 1] !== '@') {
+                didUserClose.current = false;
+            }
+            return;
+        }
+
         const newState = triggerRef.current.update(text, caretPos, mentionResults.length);
         
         const wasInactive = !mentionState.isActive;
@@ -96,6 +109,7 @@ export function useMentions(
             }
         } else if (e.key === 'Escape') {
             e.preventDefault();
+            didUserClose.current = true;
             closeMentions();
             return true;
         }

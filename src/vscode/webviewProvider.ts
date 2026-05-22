@@ -7,6 +7,7 @@ import { PromptManager } from "../core/promptManager";
 import { getPromptBuilderDir } from "./utils";
 import { isValidCommitHash } from "../core/gitUtils";
 import { FsPermission } from "../core/fs";
+import { PromptLibraryCategory } from "../core/interfaces";
 
 export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
   public view?: vscode.WebviewView;
@@ -717,6 +718,16 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
             vscode.window.showErrorMessage(data.message);
           }
           break;
+        case "searchSlashCommands":
+          if (data.filterString !== undefined) {
+            const results = await this._searchSlashCommands(data.filterString);
+            this.view?.webview.postMessage({
+              type: "slashCommandSearchResults",
+              results: results,
+              requestId: data.requestId,
+            });
+          }
+          break;
         case "searchMentions":
           if (data.filterString !== undefined) {
             const results = await this._searchMentions(data.filterString);
@@ -743,6 +754,65 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           break;
       }
     });
+  }
+
+  private async _searchSlashCommands(filterString: string) {
+    const results: any[] = [];
+    const lowerFilter = filterString.toLowerCase().trim();
+
+    // 1. Built-in Actions
+    const actions = [
+      { name: "file", label: "Current File", icon: "file" },
+      { name: "copy", label: "Copy Prompt", icon: "copy" },
+      { name: "send", label: "Send Prompt", icon: "send" },
+      { name: "clear", label: "Clear Session", icon: "trash" },
+    ];
+
+    for (const action of actions) {
+      if (action.name.startsWith(lowerFilter) || action.label.toLowerCase().includes(lowerFilter)) {
+        results.push({
+          type: "action",
+          name: action.name,
+          label: action.label,
+          icon: action.icon,
+        });
+      }
+    }
+
+    // 2. Search Blocks
+    const library = this._promptManager.getPromptLibrary(true, true) as PromptLibraryCategory[];
+    const searchContent = lowerFilter.replace(/^(block|group)\s*/, "");
+
+    for (const category of library) {
+      for (const block of category.files) {
+        const label = `${category.name}: ${block}`;
+        if (lowerFilter === "" || label.toLowerCase().includes(searchContent)) {
+          results.push({
+            type: "block",
+            name: block,
+            category: category.name,
+            label: label,
+            icon: "file-code",
+          });
+        }
+      }
+    }
+
+    // 3. Search Groups
+    const groups = this._promptManager.getGroupLibrary();
+    for (const group of groups) {
+      if (lowerFilter === "" || group.name.toLowerCase().includes(searchContent)) {
+        results.push({
+          type: "block",
+          name: group.name,
+          label: `Group: ${group.name}`,
+          icon: "list-tree",
+          isGroup: true,
+        });
+      }
+    }
+
+    return results.slice(0, 20);
   }
 
   private async _searchMentions(filterString: string) {
