@@ -6,17 +6,7 @@
 Rapidly compile more effective prompts and specs. Select from a library of prompt blocks ("how to", "information", "restrictions"), highlight the most important instructions, provide guiderails for the AI. Build and manage your library of prompt blocks, keeping it up to date with the MCP self learning loop.
 
 
-How does it work:
-1. Type your prompt
-2. Select your prompt blocks (instructions and information)
-3. Select your most important ones as goals
-4. Copy/send to AI!
-5. Use the MCP server for AI to update any blocks at the end
-
-<img src="assets/screenshot_overview.png" alt="Example prompt" >
-<img src="assets/example_prompt.png" alt="Example prompt" >
-
-Benefits:
+## Benefits:
 * **Provide task context, prescribe AI behaviour** Provide AI with a clearer set of instructions and expectations. Since you can quickly write a highly specific prompt, you can move information out of agents.md files and reduce this context bloat. Ultimately this reduces the changes of conflicting information being passed into AI.
 
 * **Build and evolve a knowledge library** Use the local MCP server to let AI update your prompt block library. Knowledge library that stays up to date. Have a central repository for your information.
@@ -25,6 +15,16 @@ Benefits:
 
 * **Git & tools** The record selection feature adds the current selection to the AI prompt (enables dictation while navigating).
 
+
+## Overview:
+1. Type your prompt
+2. Select your prompt blocks (instructions and information)
+3. Select your most important ones as goals
+4. Copy/send to AI!
+5. Use the MCP server for AI to update any blocks at the end
+
+<img src="assets/screenshot_overview.png" alt="Example prompt" >
+<img src="assets/example_prompt.png" alt="Example prompt" >
 
 ## Demo
 
@@ -60,17 +60,17 @@ Setup:
 
 > Note: The MCP server runs locally as a nodeJS process which is located in the vscode extension folder. Please be aware that the AI is able to read and modify the content of the specified prompt library folder via MCP tool calls.
 
-## Features step by step
+## Features
 
 ### Instructions prompt
 Enter your main instructional prompt into the top instruction box. 
 
 Pressing the live focus (⚡) button will allow you to select files and lines in the IDE and have the associated locations be added to the prompt. This is especially useful as you can dictate to the computer while navigating around the codebase and you should end up with contextual file tags as you navigate - it creates a similar experience to someone watching your screen as you explain. 
 
-### Adding prompt blocks
+### Prompt blocks
 Prompt blocks are broken down into categories; one for each folder and also a set of special categories (bottom). 
 
-**References:** 
+#### References:
 The generated prompt is broken into two sections: XML blocks of prompt blocks at the top, and Markdown for the the main prompt at the bottom.
 
 Prompt forget adds key reminders to the ai, in the bottom markdown section, to perform the task in the prompt blocks above. 
@@ -86,13 +86,14 @@ The text that gets added by the main block is determined by the following text i
 The `referenceLocation` determines where the goal is injected in the prompt (e.g., `workflowFirstTurn`, `workflowEveryChange`, `workflowBeforeEditing`, `workflowEndOfTask`, `pre`, or `remark`).
 
 
-**Goals**
-To highlight a task a being particuarly important, prompt foundry adds the ability to mark blocks as a Goal. When you press the star next to an added block, it adds the block's associated reference to a specific location in the final prompt. 
+#### Goals
+To highlight a task a being particuarly important, prompt foundry adds the ability to mark blocks as a Goal. 
 
 Once added as a goal, the reference text gets added to a special section at the end of the prompt `# Key goals for while completing this task:`
 
 
-**Liquid syntax:** Prompt templates support liquid templating syntax. This is especially useful if you have a prompt for a specific purpose where you want to add some custom instructions. For example:
+#### Liquid syntax:
+Prompt templates support liquid templating syntax. This is especially useful if you have a prompt for a specific purpose where you want to add some custom instructions. For example:
 
 ```liquid
 {% comment %}
@@ -110,7 +111,8 @@ Refactor the code referenced in the main instruction prompt.
 ## Refactor Type: {{ refactor_type }}
 ```
 
-**Special categories:**
+#### Special categories:
+
 * **Ai-Contract (editable template):** A special prompt block to try encourage the AI to behave a certain way. For instance defining the role, whether to create comments etc... The extension will generate a prompt in a way that encourages the AI to stick to the contract.
 * **Tools:**
   * **Git commit:** Add a specific git commit.
