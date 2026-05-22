@@ -5,6 +5,20 @@
 
 Rapidly compile more effective prompts and specs. Select from a library of prompt blocks ("how to", "information", "restrictions"), highlight the most important instructions, provide guiderails for the AI. Build and manage your library of prompt blocks, keeping it up to date with the MCP self learning loop.
 
+## Table of Contents
+- [Benefits](#benefits)
+- [Overview](#overview)
+- [Demo](#demo)
+- [Benchmark](#benchmark)
+- [Setup](#setup)
+  - [Extension setup](#extension-setup)
+  - [MCP setup](#mcp-setup)
+- [Features](#features)
+  - [Instructions prompt](#instructions-prompt)
+  - [Prompt blocks](#prompt-blocks)
+  - [Prompt block groups](#prompt-block-groups)
+- [License & Privacy](#license--privacy)
+- [Feedback](#feedback)
 
 ## Benefits:
 * **Provide task context, prescribe AI behaviour** Provide AI with a clearer set of instructions and expectations. Since you can quickly write a highly specific prompt, you can move information out of agents.md files and reduce this context bloat. Ultimately this reduces the changes of conflicting information being passed into AI.
@@ -14,7 +28,6 @@ Rapidly compile more effective prompts and specs. Select from a library of promp
 * **Liquid syntax** Use the templating engine to quickly customize the prompt blocks according to your current task
 
 * **Git & tools** The record selection feature adds the current selection to the AI prompt (enables dictation while navigating).
-
 
 ## Overview:
 1. Type your prompt
@@ -37,6 +50,41 @@ Rapidly compile more effective prompts and specs. Select from a library of promp
   <br/>
   <em>Using MCP server to update blocks</em>
 </div>
+
+## Benchmark
+*Run #1 Baseline test* 
+Prompt on it's own using Gemini flash lite 3.1. [details link](https://github.com/simondevries/prompt-foundry/commit/3126169a48daa651567340c4127fcb4afb0f14dc#diff-dedd314698bfcab1f61269c945458e105db17cbbf27163bf6e5bebdab2a99cad)
+
+
+*Run #2*
+Prompt compiled with prompt forge using Gemini flash lite 3.1 [details link](https://github.com/simondevries/prompt-foundry/commit/ec1343262bf392c12db477a2a78f5d3a817bb735) 
+
+
+| Run | Achieved Task | Code Structure | Handholding | Steering Prompts | Remaining Sig. Bugs | 
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **#1 Baseline** | Yes | 1 large component,  | Yes (had to re-align) | 6 | Scrolling bug |
+| **#2 Foundry** | Yes |  3 components, 1 test | Minimal (errors/next steps) | 5 |  |
+
+### Run 2 - Instruction Adherence
+In addition to the results above, we see the AI in the foundry run followed instructions in the prompt blocks. Generating code according to style
+
+| Make a Plan | Used Information | TDD Approach | Code Comments | Added Logs |
+| :--- | :--- | :--- | :--- | :--- |
+| ✓ including all sections | ✓ Used to stay on track | Attempted | ✓ Some added | ✓ Logs |
+
+
+<details>
+<summary>Ai comparison of diffs</summary>
+
+Both runs used `ink` (React-based TUI) and `clipboardy`. The architectural differences matter most if this TUI is to share a core backend with the VSCode extension — which is the intended direction.
+
+**Baseline (#1)** added `commander` *and* `meow` — two CLI argument parsers doing the same job. It also added `chalk` for terminal styling alongside `ink`, creating two competing approaches: ink's declarative React component model vs. imperative ANSI escape codes. This kind of mixed-paradigm dependency set creates friction as the codebase grows, since contributors must decide which system to use for each new piece of UI. It also included no test infrastructure.
+
+**Run #2** dropped both redundant dependencies, kept the styling within ink's component model, extended the component set with `ink-select-input` (enabling interactive list/menu navigation beyond plain text input), and — most significantly — added `jest`, `ts-jest`, and `ink-testing-library`. This matters for a shared-core architecture: the core business logic (`LibraryManager`, `SessionManager`, `PromptCompiler`) already has zero VSCode dependencies by design. Run #2's test setup means TUI components and core logic can both be unit-tested in isolation, without spinning up a VSCode instance or a live terminal. That's the right foundation for a codebase where the same core is consumed by two different surfaces.
+
+In short: Run #1 works but accumulates debt. Run #2 reflects an understanding of where the project is heading.
+
+</details>
 
 
 ## Setup
