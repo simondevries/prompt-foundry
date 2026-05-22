@@ -142,6 +142,26 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
             );
           }
           break;
+        case "updateBuiltInLibrary":
+          try {
+            const targetDir = this._promptManager.promptBuilderDir;
+            const sampleDir = path.join(this._extensionUri.fsPath, "prompts");
+
+            console.log(`Updating library at ${targetDir} from ${sampleDir}`);
+            this._promptManager.initializePromptFolder(targetDir, sampleDir);
+
+            vscode.window.showInformationMessage(
+              "Prompt library updated successfully!",
+            );
+            this._promptManager.reload();
+            this.refreshView();
+          } catch (e: any) {
+            console.error(e);
+            vscode.window.showErrorMessage(
+              `Failed to update library: ${e.message}`,
+            );
+          }
+          break;
         case "webviewReady":
           console.log("Webview is ready, sending initial state.");
           this.sendInitialData();

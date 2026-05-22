@@ -16,6 +16,8 @@ interface PromptBlocksPanelProps {
   onRenameCategory: (name: string) => void;
   onCreateBlock: (category: string) => void;
   onMoveBlock: (path: string) => void;
+  onUpdateBuiltInLibrary: () => void;
+  isReadOnly: boolean;
   searchQuery?: string;
 }
 
@@ -32,6 +34,8 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
   onRenameCategory,
   onCreateBlock,
   onMoveBlock,
+  onUpdateBuiltInLibrary,
+  isReadOnly,
   searchQuery = "",
 }) => {
   const query = searchQuery.toLowerCase().trim();

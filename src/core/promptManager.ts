@@ -113,6 +113,10 @@ export class PromptManager {
     }
   }
 
+  public get promptBuilderDir(): string {
+    return this._promptBuilderDir;
+  }
+
   public hasCreatedLibraryFolder(): boolean {
     return this._fs.existsSync(this._promptBuilderDir);
   }

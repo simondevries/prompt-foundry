@@ -1101,7 +1101,36 @@ const App: React.FC = () => {
           >
             <div
               className="history-item"
-              onClick={() => postMessage({ type: "openPromptFolder" })}
+              onClick={() => {
+                setSettingsOpen(false);
+                setConfirmModal({
+                  open: true,
+                  title: "Update Prompt Library?",
+                  message: `This will update the built-in library templates to the latest version.\n\nYour own custom blocks and folders will remain completely untouched.\n\nWarning: Any direct modifications you made to built-in templates will be overwritten.\n\nWe strongly recommend committing your library to git before proceeding.`,
+                  onConfirm: () => {
+                    postMessage({ type: "updateBuiltInLibrary" });
+                    setConfirmModal((prev) => ({ ...prev, open: false }));
+                  },
+                });
+              }}
+              style={{
+                opacity: !state.settings.promptFolder || state.settings.promptFolder.includes("extension") ? 0.3 : 1,
+                cursor: !state.settings.promptFolder || state.settings.promptFolder.includes("extension") ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span className="codicon codicon-cloud-download"></span>
+                <span>Update built-in prompt library</span>
+              </div>
+            </div>
+
+            <div
+              className="history-item"
+              onClick={() => {
+                postMessage({ type: "openPromptFolder" });
+              }}
             >
               <div
                 style={{
@@ -1288,6 +1317,18 @@ const App: React.FC = () => {
               if (checkPermission("folder"))
                 postMessage({ type: "moveBlockPrompt", path });
             }}
+            onUpdateBuiltInLibrary={() => {
+              setConfirmModal({
+                open: true,
+                title: "Update Prompt Library?",
+                message: "This will overwrite existing built-in prompts in your library with the latest versions from the extension. Any manual changes to these specific files will be lost. We strongly recommend you commit your current library to git before proceeding.",
+                onConfirm: () => {
+                  postMessage({ type: "updateBuiltInLibrary" });
+                  setConfirmModal((prev) => ({ ...prev, open: false }));
+                },
+              });
+            }}
+            isReadOnly={!state.settings.promptFolder || state.settings.promptFolder.includes("extension")}
           />
         )}
       </div>

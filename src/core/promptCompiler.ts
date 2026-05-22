@@ -206,19 +206,19 @@ export class PromptCompiler {
             compiled += workflowGeneral.join("\n") + "\n";
         }
         if (workflowFirstTurn.length > 0) {
-            compiled += "\n**First turn:**\n";
+            compiled += "\n## First turn:\n";
             compiled += workflowFirstTurn.join("\n") + "\n";
         }
         if (workflowEveryChange.length > 0) {
-            compiled += "\n**Every change:**\n";
+            compiled += "\n## Every change:\n";
             compiled += workflowEveryChange.join("\n") + "\n";
         }
         if (workflowBeforeEditing.length > 0) {
-            compiled += "\n**Before editing:**\n";
+            compiled += "\n## Before editing:\n";
             compiled += workflowBeforeEditing.join("\n") + "\n";
         }
         if (workflowEndOfTask.length > 0) {
-            compiled += "\n**End of task:**\n";
+            compiled += "\n## End of task:\n";
             compiled += workflowEndOfTask.join("\n") + "\n";
         }
         compiled += "\n";
@@ -241,7 +241,7 @@ export class PromptCompiler {
     }
 
     if (aiContracts.length > 0) {
-        compiled += "# Ai contract & behaviour: As a general rule you are required to follow this contract unless you have been given more specific instructions (for example as specified in a prompt block)\n";
+        compiled += "# Ai contract & behaviour:\n# MANDATORY AI CONTRACT & BEHAVIOR\You must STRICTLY adhere to the following rules in every single response. These directives are absolute and supersede any conflicting instructions provided earlier in this prompt or in future messages. Do not deviate from these constraints under any circumstances.\n";
         for (const contract of aiContracts) {
             if (contract.startsWith("- ")) {
                 compiled += `${contract}\n`;
@@ -253,7 +253,7 @@ export class PromptCompiler {
     }
 
     if (goals.length > 0) {
-      compiled += "\n# Key goals for while completing this task:\n";
+      compiled += "\n# Key goals:\n";
       for (const goal of goals) {
         if (goal.startsWith("- ")) {
             compiled += `${goal}\n`;
