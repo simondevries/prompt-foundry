@@ -1,8 +1,6 @@
 <!-- 
 # ReferenceLocation: workflowEveryChange
 # Reference: Follow the Red-Green-Refactor TDD cycle as per "{{blockName}}"
-
-# Goal: All phases of TDD executed in order. Failed tests, passing tests, refactored code.
 -->
 Follow TDD to implement the feature or fix described in the main instruction prompt.
 

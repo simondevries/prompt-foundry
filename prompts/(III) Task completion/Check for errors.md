@@ -1,8 +1,6 @@
 <!-- 
 # ReferenceLocation: workflowEndOfTask
 # Reference: Ensure there are no errors in the updated project code as per "{{blockName}}"
-
-# Goal: The relevant tools are called to check for errors
 -->
 
 Ensure there are no errors in the updated project code.

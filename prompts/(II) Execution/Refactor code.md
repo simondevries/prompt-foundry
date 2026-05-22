@@ -20,8 +20,6 @@ vars:
 <!-- 
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Refactor the code according to the "{{ refactor_type }}" type as per "{{blockName}}"
-
-# Goal: The code has been refactored by the end of the task
 -->
 Refactor the code referenced in the main instruction prompt.
 

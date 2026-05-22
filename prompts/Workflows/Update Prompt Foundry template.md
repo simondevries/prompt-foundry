@@ -8,8 +8,6 @@ vars:
 <!-- 
 # ReferenceLocation: workflow
 # Reference: Run a self-improvement loop on the "{{ target_template }}" template as per "{{blockName}}"
-
-# Goal: Improve Prompt Forge Template
 -->
 
 Run a self-improvement loop to review and enhance a Prompt Sandbox template.

@@ -1,8 +1,6 @@
 <!--
 # ReferenceLocation: workflowEndOfTask
 # Reference: Perform a "Definition of Done" check as per "{{blockName}}"
-
-# Goal: After completing the task, you have reported whether the task is complete
 -->
 
 Perform a "Definition of Done" check on the current task.

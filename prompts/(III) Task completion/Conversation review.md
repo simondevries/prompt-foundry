@@ -1,8 +1,6 @@
 <!--
 # ReferenceLocation: workflowEndOfTask
 # Reference: Suggest improvements for prompting and tool usage as per "{{blockName}}"
-
-# Goal: After completing the task, a review of the conversation is presented
 -->
 
 Review the conversation we just had and suggest improvements for my prompting and your tool usage.

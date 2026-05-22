@@ -10,8 +10,6 @@ vars:
 <!-- 
 # ReferenceLocation: workflow
 # Reference: Execute a git {{ strategy }} workflow from "{{ target_branch }}" as per "{{blockName}}"
-
-# Goal: Auto-{{ strategy }} Branch
 -->
 
 Execute a git {{ strategy }} workflow from the `{{ target_branch }}` branch into the current working branch and resolve any conflicts.

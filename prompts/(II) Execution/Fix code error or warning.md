@@ -1,8 +1,6 @@
 <!-- 
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Resolve the code error, lint warning, or type error as per "{{blockName}}"
-
-# Goal: The code error is fixed.
 -->
 Resolve the compiler error, lint warning, or type error described in the main instruction prompt.
 

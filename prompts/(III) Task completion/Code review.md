@@ -13,8 +13,6 @@ options: [
 <!--
 # ReferenceLocation: workflowEndOfTask
 # Reference: Present a code review report of the {{ review_source }} as per "{{blockName}}"
-
-# Goal: After completing the task, a code review report is presented.
 -->
 
 Review the code (Source: {{ review_source }}) as if reviewing a Pull Request.
