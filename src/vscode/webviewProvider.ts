@@ -540,8 +540,15 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           break;
         case "selectAgent":
           if (data.agent) {
-            this._promptManager.addGroupToActiveBlocks(data.agent);
-            this.refresh();
+            // Find the group by name
+            const groups = this._promptManager.getGroupLibrary();
+            const group = groups.find((g: any) => g.name === data.agent);
+            if (group) {
+              this._promptManager.addGroupToActiveBlocks(group);
+              this.refresh();
+            } else {
+              vscode.window.showErrorMessage(`Group "${data.agent}" not found.`);
+            }
           }
           break;
         case "createAgent":

@@ -190,9 +190,7 @@ export class LibraryManager {
     const RESERVED_METADATA_KEYS = [
       'referencelocation',
       'reference',
-      'goal',
       'alwaysgoal',
-      'hasgoal',
       'isspecial'
     ];
 
@@ -200,9 +198,7 @@ export class LibraryManager {
       'blockname',
       'referencelocation',
       'reference',
-      'goal',
-      'alwaysgoal',
-      'hasgoal'
+      'alwaysgoal'
     ];
 
     for (const match of matches) {

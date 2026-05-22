@@ -440,21 +440,22 @@ export class PromptManager {
           const content = this._fs.readFileSync(block.path, "utf8").toString();
           block.content = content;
           const result = this.parseBlockMetadata(content);
-          const metadata = result?.metadata;
-          block.hasGoal = !!metadata?.reference || block.category === "AI-Contracts" || block.category === "Claude Skills";
-          
-          const isAlwaysGoal = metadata?.alwaysGoal === 'true' || metadata?.alwaysGoal === true;
-          block.isAlwaysGoal = isAlwaysGoal;
-          block.referenceLocation = metadata?.referencelocation as any || 'none';
-          block.reference = metadata?.reference as any || '';
-          if (isAlwaysGoal) {
-            block.isGoal = true;
-          }
+          this.applyMetadataToBlock(block, result?.metadata);
         }
       } catch (e) {
         console.error(`Failed to reload active block ${block.path}`, e);
       }
     }
+  }
+
+  private applyMetadataToBlock(block: PromptBlock, metadata: any) {
+    const isAlwaysGoal = metadata?.alwaysGoal === 'true' || metadata?.alwaysGoal === true;
+    block.isAlwaysGoal = isAlwaysGoal;
+    block.isGoal = isAlwaysGoal || (block.isGoal ?? false);
+    // A star is visible for all user prompts except special blocks and AI-Contracts.
+    block.hasGoal = !block.isSpecial && block.category !== "AI-Contracts";
+    block.referenceLocation = metadata?.referencelocation as any || 'none';
+    block.reference = metadata?.reference as any || '';
   }
 
   private loadMainInstruction() {
@@ -565,23 +566,18 @@ export class PromptManager {
       }
 
       const result = this.parseBlockMetadata(content);
-      const metadata = result?.metadata;
-      const isAlwaysGoal = metadata?.alwaysGoal === 'true' || metadata?.alwaysGoal === true;
 
-      const block = {
+      const block: PromptBlock = {
         category,
         name: filename,
         path: filePath,
         content: variables ? this.renderTemplate(content, variables) : content,
         variables,
         isSpecial,
-        isGoal: isAlwaysGoal || false,
-        hasGoal: !!metadata?.reference || category === "AI-Contracts" || category === "Claude Skills",
-        isAlwaysGoal,
-        referenceLocation: metadata?.referencelocation as any || 'none',
-        reference: metadata?.reference as any || '',
         contextFiles: [],
       };
+
+      this.applyMetadataToBlock(block, result?.metadata);
 
       if (category === "AI-Contracts") {
         this._activeBlocks.unshift(block);
@@ -657,7 +653,7 @@ export class PromptManager {
         content: content,
         isSpecial: true,
         isGoal: false,
-        hasGoal: !!this.parseBlockMetadata(content)?.metadata?.reference,
+        hasGoal: false,
         contextFiles: [],
       });
     } else {

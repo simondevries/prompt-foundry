@@ -127,46 +127,47 @@ const App: React.FC = () => {
     updateCommands,
     handleKeyDown: handleCommandKeyDown,
     closeCommands,
-  } = useSlashCommands(
-    postMessage,
-    (result: CommandResult) => {
-        const text = state.mainInstruction;
-        const startIndex = commandState.startIndex!;
-        const caretPos = promptInputRef.current?.selectionStart || text.length;
+  } = useSlashCommands(postMessage, (result: CommandResult) => {
+    const text = state.mainInstruction;
+    const startIndex = commandState.startIndex!;
+    const caretPos = promptInputRef.current?.selectionStart || text.length;
 
-        // 1. Clear the command text
-        const newText = text.substring(0, startIndex) + text.substring(caretPos);
-        updateState({ mainInstruction: newText });
-        postMessage({ type: "updateMainInstruction", value: newText });
+    // 1. Clear the command text
+    const newText = text.substring(0, startIndex) + text.substring(caretPos);
+    updateState({ mainInstruction: newText });
+    postMessage({ type: "updateMainInstruction", value: newText });
 
-        // 2. Execute the result
-        if (result.type === 'action') {
-            if (result.name === 'copy') handleCopy();
-            else if (result.name === 'send') handleSend();
-            else if (result.name === 'file') handleAddCurrentFile();
-            else if (result.name === 'clear') handleClear();
-        } else if (result.isGroup) {
-            handleAddGroup(result.name);
-        } else {
-            postMessage({ type: "addBlock", category: result.category || 'Tools', file: result.name });
-        }
-        
-        setTimeout(() => promptInputRef.current?.focus(), 0);
+    // 2. Execute the result
+    if (result.type === "action") {
+      if (result.name === "copy") handleCopy();
+      else if (result.name === "send") handleSend();
+      else if (result.name === "file") handleAddCurrentFile();
+      else if (result.name === "clear") handleClear();
+    } else if (result.isGroup) {
+      handleAddGroup(result.name);
+    } else {
+      postMessage({
+        type: "addBlock",
+        category: result.category || "Tools",
+        file: result.name,
+      });
     }
-  );
+
+    setTimeout(() => promptInputRef.current?.focus(), 0);
+  });
 
   // Close overlays on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.history-overlay') && !target.closest('.icon-btn')) {
+      if (!target.closest(".history-overlay") && !target.closest(".icon-btn")) {
         setHistoryOpen(false);
         setTemplatesOpen(false);
         setSettingsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -191,13 +192,13 @@ const App: React.FC = () => {
     handleSend,
     handleClear,
     handleAddCurrentFile,
-    handleAddGroup
+    handleAddGroup,
   } = useAppActions({
     postMessage,
     updateState,
     state,
     clearAutoSaveTimers,
-    setShowRestore
+    setShowRestore,
   });
 
   const handleMainInstructionChange = (
@@ -271,7 +272,7 @@ const App: React.FC = () => {
       activeTag: currentTag || null,
       autoTagCount: 0,
     });
-  }, [updateState, findAllTags]);  // Global click handler to close overlays
+  }, [updateState, findAllTags]); // Global click handler to close overlays
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -349,23 +350,44 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       {state.proposedEdits && state.proposedEdits.length > 0 && (
-        <div style={{ padding: '8px 12px', paddingBottom: 0 }}>
+        <div style={{ padding: "8px 12px", paddingBottom: 0 }}>
           {(() => {
             const edit = state.proposedEdits[0]; // Show the most recent edit (sorted in promptManager)
             const isOpened = diffOpenedId === edit.id;
-            
+
             return (
-              <div className="banner banner-attention" style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                className="banner banner-attention"
+                style={{
+                  marginBottom: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
                   <span className="codicon codicon-git-pull-request"></span>
-                  <span>AI proposed an edit to <strong>{edit.name}</strong></span>
+                  <span>
+                    AI proposed an edit to <strong>{edit.name}</strong>
+                  </span>
                 </div>
-                <div style={{ display: 'flex', gap: '4px' }}>
+                <div style={{ display: "flex", gap: "4px" }}>
                   {!isOpened ? (
-                    <button 
+                    <button
                       className="banner-cta"
                       onClick={() => {
-                        postMessage({ type: "openProposedDiff", diffFile: edit.diffFile, targetFile: edit.targetFile });
+                        postMessage({
+                          type: "openProposedDiff",
+                          diffFile: edit.diffFile,
+                          targetFile: edit.targetFile,
+                        });
                         setDiffOpenedId(edit.id);
                       }}
                     >
@@ -373,21 +395,31 @@ const App: React.FC = () => {
                     </button>
                   ) : (
                     <>
-                      <button 
+                      <button
                         className="banner-cta"
-                        style={{ backgroundColor: '#1e7e34', color: 'white' }}
+                        style={{ backgroundColor: "#1e7e34", color: "white" }}
                         onClick={() => {
-                          postMessage({ type: "commitProposedEdit", id: edit.id });
+                          postMessage({
+                            type: "commitProposedEdit",
+                            id: edit.id,
+                          });
                           setDiffOpenedId(null);
                         }}
                       >
                         Commit
                       </button>
-                      <button 
+                      <button
                         className="banner-cta"
-                        style={{ backgroundColor: 'transparent', border: '1px solid var(--vscode-testing-iconFailed)', color: 'var(--vscode-testing-iconFailed)' }}
+                        style={{
+                          backgroundColor: "transparent",
+                          border: "1px solid var(--vscode-testing-iconFailed)",
+                          color: "var(--vscode-testing-iconFailed)",
+                        }}
                         onClick={() => {
-                          postMessage({ type: "rejectProposedEdit", id: edit.id });
+                          postMessage({
+                            type: "rejectProposedEdit",
+                            id: edit.id,
+                          });
                           setDiffOpenedId(null);
                         }}
                       >
@@ -432,17 +464,21 @@ const App: React.FC = () => {
             />
           </div>
 
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            backgroundColor: "var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.1))",
-            border: "1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2))",
-            borderRadius: "4px",
-            marginLeft: "6px",
-            marginRight: "2px",
-            padding: "2px",
-            gap: "2px"
-          }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              backgroundColor:
+                "var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.1))",
+              border:
+                "1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.2))",
+              borderRadius: "4px",
+              marginLeft: "6px",
+              marginRight: "2px",
+              padding: "2px",
+              gap: "2px",
+            }}
+          >
             <IconButton
               id="followBtn"
               icon={state.followActiveFile ? "record" : "zap"}
@@ -462,7 +498,14 @@ const App: React.FC = () => {
                 borderRadius: "2px",
               }}
             />
-            <div style={{ width: "1px", height: "14px", backgroundColor: "var(--vscode-widget-border, rgba(128, 128, 128, 0.2))" }} />
+            <div
+              style={{
+                width: "1px",
+                height: "14px",
+                backgroundColor:
+                  "var(--vscode-widget-border, rgba(128, 128, 128, 0.2))",
+              }}
+            />
             <IconButton
               id="cameraBtn"
               icon="device-camera"
@@ -736,7 +779,7 @@ const App: React.FC = () => {
                     }
                   }
                 }}
-                placeholder="Type your main instructions here..."
+                placeholder="Type your main instructions here... Slash '/' for commands, '@' to mention files."
               ></textarea>
 
               {mentionState.isActive && (
@@ -758,29 +801,41 @@ const App: React.FC = () => {
                   selectedIndex={commandSelectedIndex}
                   anchorElement={promptInputRef.current}
                   onSelect={(result) => {
-                      if (result.type === 'action') {
-                        if (result.name === 'copy') handleCopy();
-                        else if (result.name === 'send') handleSend();
-                        else if (result.name === 'file') handleAddCurrentFile();
-                        else if (result.name === 'clear') handleClear();
-                      } else if (result.icon === 'list-tree' || result.label.startsWith('Group:')) {
-                        // It's a group
-                        postMessage({ type: "selectAgent", agent: result.name });
-                      } else {
-                        // It's a block
-                        postMessage({ type: "addBlock", category: result.category || 'Tools', file: result.name });
-                      }
-                      
-                      // Remove the command text from the textarea
-                      const text = state.mainInstruction;
-                      const startIndex = commandState.startIndex!;
-                      const caretPos = promptInputRef.current?.selectionStart || text.length;
-                      const newText = text.substring(0, startIndex) + text.substring(caretPos);
-                      updateState({ mainInstruction: newText });
-                      postMessage({ type: "updateMainInstruction", value: newText });
+                    if (result.type === "action") {
+                      if (result.name === "copy") handleCopy();
+                      else if (result.name === "send") handleSend();
+                      else if (result.name === "file") handleAddCurrentFile();
+                      else if (result.name === "clear") handleClear();
+                    } else if (
+                      result.icon === "list-tree" ||
+                      result.label.startsWith("Group:")
+                    ) {
+                      // It's a group
+                      postMessage({ type: "selectAgent", agent: result.name });
+                    } else {
+                      // It's a block
+                      postMessage({
+                        type: "addBlock",
+                        category: result.category || "Tools",
+                        file: result.name,
+                      });
+                    }
 
-                      closeCommands();
-                      setTimeout(() => promptInputRef.current?.focus(), 0);
+                    // Remove the command text from the textarea
+                    const text = state.mainInstruction;
+                    const startIndex = commandState.startIndex!;
+                    const caretPos =
+                      promptInputRef.current?.selectionStart || text.length;
+                    const newText =
+                      text.substring(0, startIndex) + text.substring(caretPos);
+                    updateState({ mainInstruction: newText });
+                    postMessage({
+                      type: "updateMainInstruction",
+                      value: newText,
+                    });
+
+                    closeCommands();
+                    setTimeout(() => promptInputRef.current?.focus(), 0);
                   }}
                 />
               )}
@@ -967,13 +1022,15 @@ const App: React.FC = () => {
         </SectionHeader>
 
         {!state.isUserInitializedLibrary && (
-          <Banner 
+          <Banner
             mode="info"
             message="Prompt Library is in Read-Only mode. Set a library folder to enable Edit mode, groups and history features."
             ctaText="Set Folder"
-            onCtaClick={() => setPermissionsModal({ open: true, defaultExpanded: "folder" })}
+            onCtaClick={() =>
+              setPermissionsModal({ open: true, defaultExpanded: "folder" })
+            }
             canClose={false}
-            style={{ marginTop: '8px' }}
+            style={{ marginTop: "8px" }}
           />
         )}
 
@@ -1270,13 +1327,18 @@ const App: React.FC = () => {
       </div>
 
       {/* FEEDBACK BUTTON */}
-      <div 
-        className="feedback-btn" 
+      <div
+        className="feedback-btn"
         title="Give Feedback"
-        onClick={() => postMessage({ type: 'openExternal', url: 'https://form.typeform.com/to/hAc2CQ6A' })}
+        onClick={() =>
+          postMessage({
+            type: "openExternal",
+            url: "https://form.typeform.com/to/hAc2CQ6A",
+          })
+        }
       >
         <span className="codicon codicon-feedback"></span>
-        <span style={{ marginLeft: '8px' }}>Feedback valued (1 min)</span>
+        <span style={{ marginLeft: "8px" }}>Feedback valued (1 min)</span>
       </div>
 
       {/* MODAL: CONFIRMATION */}
@@ -1315,7 +1377,6 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-
 
       {/* MODAL: GROUP CREATION */}
       {groupModal.open && (
@@ -1386,9 +1447,9 @@ const App: React.FC = () => {
             content: (
               <div>
                 <p>
-                  <strong>Why is this needed?</strong> Prompt Foundry needs access
-                  to a local folder to serve as your dedicated prompt library
-                  workspace.
+                  <strong>Why is this needed?</strong> Prompt Foundry needs
+                  access to a local folder to serve as your dedicated prompt
+                  library workspace.
                 </p>
                 <p>
                   <strong>Benefits:</strong> By initializing a library, you gain
@@ -1438,7 +1499,9 @@ const App: React.FC = () => {
             icon: "claude",
             content: (
               <div>
-                <p>Allow Prompt Foundry to read Claude Code skills and commands.</p>
+                <p>
+                  Allow Prompt Foundry to read Claude Code skills and commands.
+                </p>
                 <button
                   className="main-btn"
                   onClick={() =>
@@ -1481,9 +1544,9 @@ const App: React.FC = () => {
             content: (
               <div>
                 <p>
-                  The Prompt Foundry MCP Server powers a circular, self-improving
-                  prompt library. AI agents can read and improve your prompt
-                  blocks based on session learning.
+                  The Prompt Foundry MCP Server powers a circular,
+                  self-improving prompt library. AI agents can read and improve
+                  your prompt blocks based on session learning.
                 </p>
                 <pre
                   style={{

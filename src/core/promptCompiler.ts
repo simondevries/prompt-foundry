@@ -224,6 +224,7 @@ export class PromptCompiler {
         compiled += "\n";
     }
 
+    compiled += "# Main instruction/prompt\n";
     compiled += finalMainInstruction + "\n\n";
 
     if (remarks.length > 0) {
