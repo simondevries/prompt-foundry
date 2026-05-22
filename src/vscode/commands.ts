@@ -65,7 +65,28 @@ export function registerCommands(
     },
   );
 
-  context.subscriptions.push(sendPromptCommand, editPromptCommand);
+  // Command to reset prompts
+  const updatePromptsCommand = vscode.commands.registerCommand(
+    "prompt-forge.updatePrompts",
+    async () => {
+      const confirm = await vscode.window.showWarningMessage(
+        "Are you sure you want to update all prompt templates? This will overwrite any custom changes you have made to the original prompts.",
+        "Update Prompts",
+        "Cancel"
+      );
+
+      if (confirm === "Update Prompts") {
+        try {
+          promptManager.resetPrompts();
+          vscode.window.showInformationMessage("Prompts updated successfully!");
+        } catch (error: any) {
+          vscode.window.showErrorMessage(`Failed to update prompts: ${error.message}`);
+        }
+      }
+    },
+  );
+
+  context.subscriptions.push(sendPromptCommand, editPromptCommand, updatePromptsCommand);
 }
 
 export function setupFileWatcher(
