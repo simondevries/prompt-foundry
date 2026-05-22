@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Present solutions to the user before implementing anything, as per "{{blockName}}"
 -->

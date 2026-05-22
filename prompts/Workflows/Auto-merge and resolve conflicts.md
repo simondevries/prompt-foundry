@@ -8,6 +8,7 @@ vars:
     options: ["merge", "rebase"]
 {% endcomment %}
 <!-- 
+# version: 1.0
 # ReferenceLocation: workflow
 # Reference: Execute a git {{ strategy }} workflow from "{{ target_branch }}" as per "{{blockName}}"
 

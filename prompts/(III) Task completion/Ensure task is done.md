@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowEndOfTask
 # Reference: Perform a "Definition of Done" check as per "{{blockName}}"
 

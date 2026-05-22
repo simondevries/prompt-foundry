@@ -6,6 +6,7 @@ vars:
 {% endcomment %}
 
 <!--
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Diagnose the error before applying any fix, as per "{{blockName}}"
 -->

@@ -1,4 +1,5 @@
 <!--
+# version: 1.0
 # ReferenceLocation: workflowBeforeEditing
 # Reference: Write a step-by-step implementation plan before writing any code, as per "{{blockName}}"
 -->
