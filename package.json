@@ -4,6 +4,7 @@
   "displayName": "Prompt Foundry",
   "description": "Forge complex AI prompts from a library of living blocks that update and evolve with your project.",
   "version": "0.1.0",
+  "type": "module",
   "icon": "assets/150.png",
   "license": "MIT",
   "repository": {
@@ -113,6 +114,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/react": "^19.2.14",
@@ -122,6 +124,9 @@
     "@vscode/test-electron": "^2.5.2",
     "copy-webpack-plugin": "^14.0.0",
     "eslint": "^9.39.2",
+    "ink-testing-library": "^4.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0",
@@ -130,8 +135,13 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
+    "@types/ink": "^2.0.3",
     "@vscode/codicons": "^0.0.45",
+    "clipboardy": "^5.3.1",
     "diff": "^8.0.4",
+    "ink": "^7.0.3",
+    "ink-select-input": "^6.2.0",
+    "ink-text-input": "^6.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   }

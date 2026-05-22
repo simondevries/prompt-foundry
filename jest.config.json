@@ -1,0 +1,15 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.(ts|tsx)$": ["ts-jest", {
+      "tsconfig": {
+        "jsx": "react-jsx"
+      },
+      "isolatedModules": true
+    }]
+  },
+  "moduleNameMapper": {
+    "\\.(png|jpg|svg)$": "<rootDir>/__mocks__/fileMock.js"
+  }
+}
