@@ -12,26 +12,143 @@
   </a>
 </div>
 
-Rapidly compile more effective prompts and specs. Select from a library of prompt blocks ("how to", "information", "restrictions"), highlight the most important instructions, and provide guardrails for the AI. Build and manage your library of prompt blocks, keeping it up to date with the MCP self-learning loop.
+AI goes off the rails in large codebases. It forgets conventions, ignores architecture, and needs constant steering. Prompt Foundry fixes that with composable prompt blocks, behavioral guardrails, and a knowledge library that updates itself through your AI sessions. Works with any AI tool - Claude, Cursor, Copilot, and others.
 
-## Benefits:
-* **Provide task context, prescribe AI behaviour:** Provide the AI with a clearer set of instructions and expectations. Since you can quickly write a highly specific prompt, you can move information out of agents.md files and reduce this context bloat. Ultimately, this reduces the chances of conflicting information being passed into the AI. See benchmark results [here](https://github.com/simondevries/prompt-foundry#benchmark)
+## Benchmark
 
-* **Build and evolve a knowledge library:** Use the local MCP server to let the AI update your prompt block library. A knowledge library that stays up to date allows you to have a central repository for your information.
+Run #1 is a baseline prompt. Run #2 uses Prompt Foundry. Both use Gemini Flash Lite 3.1.
 
-* **Liquid syntax:** Use the templating engine to quickly customize the prompt blocks according to your current task.
+The key differences: better code structure and far less handholding.
 
-* **Git & tools:** The record selection feature adds the current selection to the AI prompt (enables dictation while navigating).
+| Run | Achieved Task | Code Structure | Handholding | Remaining Sig. Bugs |
+| :--- | :--- | :--- | :--- | :--- |
+| **#1 Baseline** | Yes | 1 large component | Yes (had to re-align) | Scrolling bug |
+| **#2 Foundry** | Yes | 3 components, 1 test | Minimal (errors/next steps) | |
 
-## Overview:
+Run #2 also followed instructions in the prompt blocks, generating code according to defined style.
+
+| Make a Plan | Used Information | TDD Approach | Code Comments | Added Logs |
+| :--- | :--- | :--- | :--- | :--- |
+| ✓ including all sections | ✓ Used to stay on track | Attempted | ✓ Some added | ✓ Logs |
+
+Details: [Baseline](https://github.com/simondevries/prompt-foundry/commit/3126169a48daa651567340c4127fcb4afb0f14dc#diff-dedd314698bfcab1f61269c945458e105db17cbbf27163bf6e5bebdab2a99cad) | [Foundry run](https://github.com/simondevries/prompt-foundry/commit/ec1343262bf392c12db477a2a78f5d3a817bb735)
+
+<details>
+<summary>AI comparison of diffs</summary>
+
+Both runs used `ink` (React-based TUI) and `clipboardy`. The architectural differences matter most if this TUI is to share a core backend with the VSCode extension, which is the intended direction.
+
+**Baseline (#1)** added `commander` *and* `meow` - two CLI argument parsers doing the same job. It also added `chalk` for terminal styling alongside `ink`, creating two competing approaches: ink's declarative React component model vs. imperative ANSI escape codes. This kind of mixed-paradigm dependency set creates friction as the codebase grows. It also included no test infrastructure.
+
+**Run #2** dropped both redundant dependencies, kept styling within ink's component model, extended the component set with `ink-select-input`, and added `jest`, `ts-jest`, and `ink-testing-library`. The core business logic (`LibraryManager`, `SessionManager`, `PromptCompiler`) already has zero VSCode dependencies by design. Run #2's test setup means TUI components and core logic can both be unit-tested in isolation, without spinning up a VSCode instance or a live terminal.
+
+In short: Run #1 works but accumulates debt. Run #2 reflects an understanding of where the project is heading.
+</details>
+
+## How it works
+
 1. Type your prompt
 2. Select your prompt blocks (instructions and information)
-3. Select your most important ones as goals
-4. Copy/send to AI!
-5. Use the MCP server for the AI to update any blocks at the end
+3. Mark the most important ones as goals
+4. Copy/send to AI
+5. Use the MCP server to let the AI update blocks at the end of the session
 
-<img src="assets/screenshot_overview.png" alt="Example prompt" >
+<img src="assets/screenshot_overview.png" alt="Overview" >
 <img src="assets/example_prompt.png" alt="Example prompt" >
+
+[See demo](#demo)
+
+## Why use it
+
+* **Less context bloat:** Move AI instructions out of `agents.md` files into task-specific prompt blocks. Reduces conflicting information passed to the AI.
+* **Self-improving knowledge library:** The local MCP server lets the AI update your prompt block library mid-session. Your knowledge base improves with use.
+* **Templating:** Liquid syntax lets you customize prompt blocks for the current task without rewriting from scratch.
+* **Git and IDE tools:** Record selection adds your current code selection to the prompt. Useful for dictating while navigating a codebase.
+
+## Setup
+
+### Extension
+Install from the VS Code marketplace. To add or edit prompt templates, allow the extension to create a prompt library on your file system. Set the location via the gear icon next to prompt blocks or through VS Code settings.
+
+> Note: When editing from the editor you need to open the prompt library folder in VS Code and click 'trust'. The folder only contains `.md` files and prompt settings files.
+
+### MCP server
+
+> Note: The MCP server requires Node.js to be installed on your machine.
+
+1. Open the extension
+2. Click the gear next to `Prompt Block Library`
+3. Click `Setup MCP Server...`
+4. Copy the JSON snippet
+5. Add it to your AI's MCP config
+
+> Note: The MCP server runs locally as a Node.js process in the VS Code extension folder. The AI can read and modify the content of the specified prompt library folder via MCP tool calls.
+
+## Features
+
+### Instructions prompt
+Enter your main instructional prompt into the top instruction box.
+
+The live focus (⚡) button lets you select files and lines in the IDE and adds those locations to the prompt. Useful for dictating while navigating a codebase - you end up with contextual file tags as you navigate, similar to someone watching your screen as you explain.
+
+### Prompt blocks
+Broken down into categories, one per folder, plus a set of special categories. Optionally add your Claude or Cursor skills too.
+
+#### References
+Each prompt block can include a short reference - a reminder that gets injected into the workflow section of the prompt at a specific moment. Rather than listing all instructions upfront and hoping the AI remembers them, references tell the AI *when* to act on an instruction. This has been shown to improve adherence.
+
+```markdown
+<!--
+# reference: Ensure the code has been refactored by the end of the task
+# referencelocation: workflowEndOfTask
+-->
+```
+
+`referenceLocation` controls when the reminder fires:
+
+| Value | When |
+| :--- | :--- |
+| `workflowFirstTurn` | Start of the first turn |
+| `workflowEveryChange` | Before every code change |
+| `workflowBeforeEditing` | Before the AI starts editing |
+| `workflowEndOfTask` | End of the task |
+| `pre` | Top of the prompt |
+| `remark` | General remark |
+
+#### Goals
+Star a block to mark it as a goal. Its reference text gets pulled into a dedicated `# Key goals for while completing this task:` section at the end of the prompt, giving the AI a clear summary of what matters most before it starts work.
+
+#### Templating
+Prompt blocks support Liquid syntax. Useful when you want to add custom variables to a block without rewriting it:
+
+```liquid
+{% comment %}
+vars:
+  refactor_type:
+    type: select
+    options: [
+      "One",
+      "Two",
+    ]
+  role: type: text
+{% endcomment %}
+Refactor the code referenced in the main instruction prompt.
+## Refactor Type: {{ refactor_type }}
+```
+
+#### Special categories
+
+* **AI Contract (editable template):** Define role, comment style, and other behavioral expectations. The extension structures the prompt to encourage the AI to stick to the contract.
+* **Tools:**
+  * **Git commit:** Add a specific git commit.
+  * **Git diff:** Add a diff against a branch or commit hash.
+  * **IDE diagnostics:** Share detailed errors if you don't have IDE MCP set up.
+  * **Active symbols:** Add file summaries for context.
+* **Claude skills and commands:** Lists Claude skills and commands from your global Claude folder and prompts the AI to use them.
+* **Cursor rules:** Same as above.
+
+### Prompt block groups
+Once you've added a few blocks, save them as a group. Useful for repeating the same setup across similar tasks.
 
 ## Demo
 
@@ -45,129 +162,13 @@ Rapidly compile more effective prompts and specs. Select from a library of promp
   <em>Using MCP server to update blocks</em>
 </div>
 
-## Benchmark
-*Run #1 Baseline test* 
-Prompt on its own using Gemini Flash Lite 3.1. [details link](https://github.com/simondevries/prompt-foundry/commit/3126169a48daa651567340c4127fcb4afb0f14dc#diff-dedd314698bfcab1f61269c945458e105db17cbbf27163bf6e5bebdab2a99cad)
-
-*Run #2*
-Prompt compiled with Prompt Foundry using Gemini Flash Lite 3.1. [details link](https://github.com/simondevries/prompt-foundry/commit/ec1343262bf392c12db477a2a78f5d3a817bb735) 
-
-| Run | Achieved Task | Code Structure | Handholding | Steering Prompts | Remaining Sig. Bugs | 
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **#1 Baseline** | Yes | 1 large component | Yes (had to re-align) | 6 | Scrolling bug |
-| **#2 Foundry** | Yes |  3 components, 1 test | Minimal (errors/next steps) | 5 |  |
-
-### Run 2 - Instruction Adherence
-In addition to the results above, we see the AI in the Foundry run followed instructions in the prompt blocks. Generating code according to style.
-
-| Make a Plan | Used Information | TDD Approach | Code Comments | Added Logs |
-| :--- | :--- | :--- | :--- | :--- |
-| ✓ including all sections | ✓ Used to stay on track | Attempted | ✓ Some added | ✓ Logs |
-
-<details>
-<summary>AI comparison of diffs</summary>
-
-Both runs used `ink` (React-based TUI) and `clipboardy`. The architectural differences matter most if this TUI is to share a core backend with the VSCode extension — which is the intended direction.
-
-**Baseline (#1)** added `commander` *and* `meow` — two CLI argument parsers doing the same job. It also added `chalk` for terminal styling alongside `ink`, creating two competing approaches: ink's declarative React component model vs. imperative ANSI escape codes. This kind of mixed-paradigm dependency set creates friction as the codebase grows, since contributors must decide which system to use for each new piece of UI. It also included no test infrastructure.
-
-**Run #2** dropped both redundant dependencies, kept the styling within ink's component model, extended the component set with `ink-select-input` (enabling interactive list/menu navigation beyond plain text input), and — most significantly — added `jest`, `ts-jest`, and `ink-testing-library`. This matters for a shared-core architecture: the core business logic (`LibraryManager`, `SessionManager`, `PromptCompiler`) already has zero VSCode dependencies by design. Run #2's test setup means TUI components and core logic can both be unit-tested in isolation, without spinning up a VSCode instance or a live terminal. That's the right foundation for a codebase where the same core is consumed by two different surfaces.
-
-In short: Run #1 works but accumulates debt. Run #2 reflects an understanding of where the project is heading.
-
-</details>
-
-## Setup
-
-### Extension setup
-Once you have installed the extension from the VS Code marketplace, you can immediately start building prompts. If you want to add or edit the prompt templates, you will need to allow the extension to create a prompt library somewhere on the file system. 
-
-You can modify the location of this path through the settings gear next to the prompt blocks or via the VS Code settings panel.
-
-> Note: In order to avoid a permissions error, when editing the extension from the editor you have to open that prompt library folder in VS Code and click 'trust'. You can manually check the folder's contents easily as it just contains .md files and the prompt settings files.
-
-### MCP setup
-To set up the MCP server, click on the settings gear in the app and click "Setup MCP server". This will provide you a JSON config you can paste into your AI's MCP settings. Note that the PROMPT_ROOT env setting should refer to the location of your prompt library folder.
-
-Setup:
-1. Open the extension
-2. Click the gear next to `Prompt Block Library` 
-3. Click `Setup MCP Server...` 
-4. Copy the JSON snippet.
-5. Add it to your AI's MCP config
-
-> Note: The MCP server runs locally as a nodeJS process which is located in the VS Code extension folder. Please be aware that the AI is able to read and modify the content of the specified prompt library folder via MCP tool calls.
-
-## Features
-
-### Instructions prompt
-Enter your main instructional prompt into the top instruction box. 
-
-Pressing the live focus (⚡) button will allow you to select files and lines in the IDE and have the associated locations be added to the prompt. This is especially useful as you can dictate to the computer while navigating around the codebase, and you should end up with contextual file tags as you navigate - it creates a similar experience to someone watching your screen as you explain. 
-
-### Prompt blocks
-Prompt blocks are broken down into categories; one for each folder and also a set of special categories (bottom). 
-
-#### References:
-The generated prompt is broken into two sections: XML blocks of prompt blocks at the top, and Markdown for the main prompt at the bottom.
-
-Prompt Foundry adds key reminders to the AI, in the bottom markdown section, to perform the task in the prompt blocks above. 
-
-The text that gets added by the main block is determined by the following text in the prompt block.
-
-```markdown
-<!--
-# reference: Ensure the code has been refactored by the end of the task
-# referencelocation: workflowEndOfTask
--->
-```
-The `referenceLocation` determines where the goal is injected in the prompt (e.g., `workflowFirstTurn`, `workflowEveryChange`, `workflowBeforeEditing`, `workflowEndOfTask`, `pre`, or `remark`).
-
-
-#### Goals
-To highlight a task as being particularly important, Prompt Foundry adds the ability to mark blocks as a Goal.
-
-Once added as a goal, the reference text gets added to a special section at the end of the prompt: # Key goals for while completing this task:
-
-#### Liquid syntax:
-Prompt templates support Liquid templating syntax. This is especially useful if you have a prompt for a specific purpose where you want to add some custom instructions. For example:
-```liquid
-{% comment %}
-vars:
-  refactor_type:
-    type: select
-    options: [
-      "One",
-      "Two",
-    ]
-TODO
-   role:  type: text
-{% endcomment %}
-Refactor the code referenced in the main instruction prompt.
-## Refactor Type: {{ refactor_type }}
-```
-
-#### Special categories:
-
-* **Ai-Contract (editable template):** A special prompt block to try encourage the AI to behave a certain way. For instance defining the role, whether to create comments etc... The extension will generate a prompt in a way that encourages the AI to stick to the contract.
-* **Tools:**
-  * **Git commit:** Add a specific git commit.
-  * **Git diff:** Add a diff against a branch or commit hash. 
-  * **Ide diagnostics:** Share a detailed errors if you don't have IDE MCP setup.
-  * **Active symbols:** Add file summaries for context.
-* **Claude skills and commands:** Lists claude skills and commands from your global claude folder. This adds a prompt asking the AI to use those prompts.
-* **Cursor rules:** Same as above.
-
-### Prompt block groups
-Create a block group once you've added a few blocks to the prompt. Those added blocks (but not the main instruction) get added under one group.
-This is especially useful when adding the same blocks for certain tasks.
-
 ## License & Privacy
 
 **License:** MIT © Simon de Vries
 
-**Privacy:** This extension is **100% local**. It does not collect, store, or transmit any user data, telemetry, or prompt content. Your prompts and ingredients never leave your machine.
+**Privacy:** 100% local. No telemetry, no data collection. Your prompts never leave your machine.
 
 ## Feedback
-Since I am not collecting any telemetry, I really rely on your feedback! Please provide your suggestions, feedback, feature requests here:
+
+No telemetry means I rely on you. Suggestions and feature requests welcome:
 https://form.typeform.com/to/hAc2CQ6A
