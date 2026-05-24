@@ -7,10 +7,11 @@ interface ActiveBlockProps {
   onEdit: (path: string) => void;
   onRemove: (path: string) => void;
   onToggleGoal: (path: string) => void;
+  onEditReference: (path: string) => void;
   currentGoalCount: number;
 }
 
-const ActiveBlock: React.FC<ActiveBlockProps> = ({ block, onEdit, onRemove, onToggleGoal, currentGoalCount }) => {
+const ActiveBlock: React.FC<ActiveBlockProps> = ({ block, onEdit, onRemove, onToggleGoal, onEditReference, currentGoalCount }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showMaxError, setShowMaxError] = useState(false);
@@ -44,6 +45,21 @@ const ActiveBlock: React.FC<ActiveBlockProps> = ({ block, onEdit, onRemove, onTo
             </span>
             {block.hasGoal && (
               <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <span 
+                  className={`icon codicon codicon-references`}
+                  title="Set or edit the workflow reference for this block"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditReference(block.path);
+                  }}
+                  style={{ 
+                    marginLeft: '8px', 
+                    fontSize: '12px',
+                    color: block.reference ? '#3794ef' : 'inherit',
+                    cursor: 'pointer',
+                    opacity: block.reference ? 1 : 0.4
+                  }}
+                ></span>
                 <span 
                   className={`icon codicon codicon-star-${block.isGoal ? 'full' : 'empty'}`}
                   title="Add this to the prompts key goals to signal important blocks"

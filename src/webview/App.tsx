@@ -909,6 +909,17 @@ const App: React.FC = () => {
                   postMessage({ type: "toggleGoal", path });
                 }
               }}
+              onEditReference={(path) => {
+                const block = state.activeBlocks.find((b) => b.path === path);
+                if (block) {
+                  setReferenceModal({
+                    open: true,
+                    blockPath: path,
+                    reference: block.reference || `... as per the block "{{blockName}}"`,
+                    location: block.referenceLocation || "workflowBeforeEditing",
+                  });
+                }
+              }}
             />
           ))}
 
@@ -1511,6 +1522,12 @@ const App: React.FC = () => {
           <div className="modal-content" style={{ maxWidth: "450px" }}>
             <div className="modal-title">Set Block Goal & Reference</div>
             <div className="modal-message">
+              <p style={{ fontSize: "0.85em", opacity: 0.8, marginBottom: "16px", lineHeight: "1.4" }}>
+                A reference directs the AI to use this block at a specific stage of your workflow. 
+                It also provides the success criteria for the "Key Goal" section when the star is enabled.
+                <br /><br />
+                Example: "Perform a security audit of the proposed changes as per {"{{blockName}}"}"
+              </p>
               <div style={{ marginBottom: "16px" }}>
                 <label
                   style={{
@@ -1520,7 +1537,7 @@ const App: React.FC = () => {
                     opacity: 0.8,
                   }}
                 >
-                  Goal Text (Reference)
+                  Reference
                 </label>
                 <textarea
                   autoFocus
