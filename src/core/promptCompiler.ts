@@ -153,7 +153,7 @@ export class PromptCompiler {
                 workflowBeforeEditing.push(bulletize(resolvedRefText));
             } else if (refLoc === 'workflowEndOfTask') {
                 workflowEndOfTask.push(bulletize(resolvedRefText));
-            } else if (refLoc === 'pre' || refLoc === 'workflow') {
+            } else if (refLoc === 'workflow') {
                 workflowGeneral.push(bulletize(resolvedRefText));
             } else if (refLoc === 'remark') {
                 remarks.push(bulletize(resolvedRefText));

@@ -453,9 +453,7 @@ export class PromptManager {
   }
 
   private applyMetadataToBlock(block: PromptBlock, metadata: any) {
-    const isAlwaysGoal = metadata?.alwaysGoal === 'true' || metadata?.alwaysGoal === true;
-    block.isAlwaysGoal = isAlwaysGoal;
-    block.isGoal = isAlwaysGoal || (block.isGoal ?? false);
+    block.isGoal = block.isGoal ?? false;
     // A star is visible for all user prompts except special blocks and AI-Contracts.
     block.hasGoal = !block.isSpecial && block.category !== "AI-Contracts";
     block.referenceLocation = metadata?.referencelocation as any || 'none';
@@ -631,7 +629,7 @@ export class PromptManager {
     
     // Max 5 goals limit
     if (!block.isGoal) {
-      const currentGoalCount = this._activeBlocks.filter(b => b.isGoal && !b.isAlwaysGoal).length;
+      const currentGoalCount = this._activeBlocks.filter(b => b.isGoal).length;
       if (currentGoalCount >= 5) {
         return false;
       }
@@ -640,6 +638,93 @@ export class PromptManager {
     block.isGoal = !block.isGoal;
     this.saveMainInstruction();
     return true;
+  }
+
+  public updateBlockReference(path: string, reference: string, location: string) {
+    const block = this._activeBlocks.find(b => b.path === path);
+    if (block) {
+      block.reference = reference;
+      block.referenceLocation = location as any;
+      block.isGoal = true;
+      this.saveMainInstruction();
+
+      // Update the actual file on disk if it's in a writeable category
+      if (this.canModifyCategory(block.category) && this._fs.existsSync(block.path)) {
+        try {
+          const content = this._fs.readFileSync(block.path, "utf8").toString();
+          const updatedContent = this.updateContentMetadata(content, {
+            Reference: reference,
+            ReferenceLocation: location,
+          });
+          this._fs.writeFileSync(block.path, updatedContent, "utf8");
+          block.content = block.variables ? this.renderTemplate(updatedContent, block.variables) : updatedContent;
+        } catch (e) {
+          console.error(`Failed to update block metadata on disk: ${block.path}`, e);
+        }
+      }
+    }
+  }
+
+  private updateContentMetadata(content: string, metadata: Record<string, string>): string {
+    const commentRegex = /(?:\{\%\s*comment\s*\%\}[\s\S]*?\{\%\s*endcomment\s*\%\}|<!--[\s\S]*?-->)/g;
+    const matches = [...content.matchAll(commentRegex)];
+    
+    let updated = false;
+    let newContent = content;
+
+    // 1. Try to update existing metadata keys in ANY comment block
+    for (const match of matches) {
+      const fullComment = match[0];
+      const isHtml = fullComment.startsWith("<!--");
+      let commentBody = fullComment.replace(/(?:\{\%\s*comment\s*\%\}|\{\%\s*endcomment\s*\%\}|<!--|-->)/g, "");
+      
+      let lines = commentBody.split("\n");
+      let changedAnyInThisBlock = false;
+
+      for (const [key, value] of Object.entries(metadata)) {
+        const keyRegex = new RegExp(`^\\s*#\\s*${key}\\s*:.*`, "i");
+        const index = lines.findIndex(line => keyRegex.test(line));
+        if (index !== -1) {
+          lines[index] = `# ${key}: ${value}`;
+          changedAnyInThisBlock = true;
+        }
+      }
+
+      if (changedAnyInThisBlock) {
+        const newCommentBody = lines.join("\n");
+        const newFullComment = isHtml ? `<!--${newCommentBody}-->` : `{% comment %}${newCommentBody}{% endcomment %}`;
+        newContent = newContent.replace(fullComment, newFullComment);
+        updated = true;
+        // Continue to check other blocks in case keys are split, but usually they are together
+      }
+    }
+
+    // 2. If keys weren't found/updated, append them to the FIRST HTML comment block (if it exists and isn't a liquid vars block)
+    if (!updated) {
+      const firstHtmlComment = matches.find(m => m[0].startsWith("<!--"));
+      if (firstHtmlComment) {
+        const fullComment = firstHtmlComment[0];
+        let commentBody = fullComment.replace(/<!--|-->/g, "");
+        if (!commentBody.endsWith("\n") && commentBody.trim().length > 0) commentBody += "\n";
+        for (const [key, value] of Object.entries(metadata)) {
+          commentBody += `# ${key}: ${value}\n`;
+        }
+        newContent = newContent.replace(fullComment, `<!--${commentBody}-->`);
+        updated = true;
+      }
+    }
+
+    // 3. Absolute fallback: prepend a new HTML comment block
+    if (!updated) {
+      let newComment = "<!--\n";
+      for (const [key, value] of Object.entries(metadata)) {
+        newComment += `# ${key}: ${value}\n`;
+      }
+      newComment += "-->\n";
+      newContent = newComment + newContent;
+    }
+
+    return newContent;
   }
 
   public addSpecialBlock(

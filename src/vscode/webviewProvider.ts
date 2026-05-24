@@ -261,6 +261,14 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           }
           this.sendBlocksUpdate();
           break;
+        case "setBlockReference":
+          this._promptManager.updateBlockReference(
+            data.path,
+            data.reference,
+            data.location,
+          );
+          this.sendBlocksUpdate();
+          break;
         case "sendPrompt":
           console.log("Send prompted triggered");
           const prompt = await this._compileCurrentPrompt();

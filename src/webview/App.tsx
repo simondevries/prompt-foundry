@@ -17,6 +17,16 @@ import { useAppActions } from "./hooks/useAppActions";
 import CommandDropdown, { CommandResult } from "./components/CommandDropdown";
 import { handleSelectionChange } from "../core/tagLogic";
 
+const REFERENCE_LOCATIONS = [
+  { value: "workflowBeforeEditing", label: "Before Editing", description: "Follow this instruction after planning but before writing any code. Best for validation steps." },
+  { value: "workflowFirstTurn", label: "First Turn", description: "Only applies to the very first response in the conversation. Best for research or setup." },
+  { value: "workflowEveryChange", label: "Every Change", description: "The AI will follow this every time it modifies a file. Best for linting or style rules." },
+  { value: "workflowEndOfTask", label: "End of Task", description: "Follow this only when the entire task is finished. Best for final reports or cleanup." },
+  { value: "workflow", label: "General Workflow", description: "General instructions that apply to the whole process. Placed at the top of the workflow." },
+  { value: "remark", label: "Remark", description: "A side-note placed in a separate '# Remarks' section after the main instruction." },
+  { value: "none", label: "Goal Only", description: "Does not appear in the workflow; only appears in the '# Key goals' section at the bottom." },
+];
+
 const App: React.FC = () => {
   const { state, postMessage, updateState, initialized } = useVsCodeApi();
 
@@ -37,6 +47,17 @@ const App: React.FC = () => {
   const [groupModal, setGroupModal] = useState<{ open: boolean; name: string }>(
     { open: false, name: "" },
   );
+  const [referenceModal, setReferenceModal] = useState<{
+    open: boolean;
+    blockPath: string;
+    reference: string;
+    location: string;
+  }>({
+    open: false,
+    blockPath: "",
+    reference: "",
+    location: "workflowBeforeEditing",
+  });
   const [dismissedSuggestionKeys, setDismissedSuggestionKeys] = useState<
     Set<string>
   >(new Set());
@@ -85,7 +106,7 @@ const App: React.FC = () => {
     // 2. Use handleSelectionChange to insert the tag with smart name logic
     const result_ = handleSelectionChange({
       currentText: textWithoutTrigger,
-      path: result.fullPath ?? '',
+      path: result.fullPath || result.name,
       lines: "",
       caretPos: startIndex,
       fileMap: state.fileMap || {},
@@ -876,7 +897,17 @@ const App: React.FC = () => {
                 state.activeBlocks.filter((b) => b.isGoal).length
               }
               onToggleGoal={(path) => {
-                postMessage({ type: "toggleGoal", path });
+                const block = state.activeBlocks.find((b) => b.path === path);
+                if (block && !block.isGoal && !block.reference) {
+                  setReferenceModal({
+                    open: true,
+                    blockPath: path,
+                    reference: `... as per the block "{{blockName}}"`,
+                    location: "workflowBeforeEditing",
+                  });
+                } else {
+                  postMessage({ type: "toggleGoal", path });
+                }
               }}
             />
           ))}
@@ -1468,6 +1499,136 @@ const App: React.FC = () => {
                 }}
               >
                 Create Group
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: SET REFERENCE */}
+      {referenceModal.open && (
+        <div className="modal-overlay" style={{ display: "flex" }}>
+          <div className="modal-content" style={{ maxWidth: "450px" }}>
+            <div className="modal-title">Set Block Goal & Reference</div>
+            <div className="modal-message">
+              <div style={{ marginBottom: "16px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontSize: "0.85em",
+                    opacity: 0.8,
+                  }}
+                >
+                  Goal Text (Reference)
+                </label>
+                <textarea
+                  autoFocus
+                  value={referenceModal.reference}
+                  onChange={(e) =>
+                    setReferenceModal((prev) => ({
+                      ...prev,
+                      reference: e.target.value,
+                    }))
+                  }
+                  placeholder="e.g. Ensure all functions have type definitions"
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    height: "80px",
+                    backgroundColor: "var(--vscode-input-background)",
+                    color: "var(--vscode-input-foreground)",
+                    border: "1px solid var(--vscode-input-border)",
+                    borderRadius: "4px",
+                    resize: "none",
+                  }}
+                />
+                <p style={{ fontSize: '0.75em', opacity: 0.6, marginTop: '4px' }}>
+                  Use <strong>{"{{blockName}}"}</strong> to automatically insert the name of this prompt block.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontSize: "0.85em",
+                    opacity: 0.8,
+                  }}
+                >
+                  Workflow Location
+                </label>
+                <select
+                  value={referenceModal.location}
+                  onChange={(e) =>
+                    setReferenceModal((prev) => ({
+                      ...prev,
+                      location: e.target.value,
+                    }))
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    backgroundColor: "var(--vscode-input-background)",
+                    color: "var(--vscode-input-foreground)",
+                    border: "1px solid var(--vscode-input-border)",
+                    borderRadius: "4px",
+                  }}
+                >
+                  {REFERENCE_LOCATIONS.map((loc) => (
+                    <option key={loc.value} value={loc.value}>
+                      {loc.label}
+                    </option>
+                  ))}
+                </select>
+                <p
+                  style={{ fontSize: "0.75em", opacity: 0.6, marginTop: "6px" }}
+                >
+                  {
+                    REFERENCE_LOCATIONS.find(
+                      (l) => l.value === referenceModal.location,
+                    )?.description
+                  }
+                </p>
+              </div>
+            </div>
+            <div className="modal-buttons">
+              <button
+                className="modal-btn modal-btn-cancel"
+                onClick={() =>
+                  setReferenceModal({
+                    open: false,
+                    blockPath: "",
+                    reference: "",
+                    location: "workflowBeforeEditing",
+                  })
+                }
+              >
+                Cancel
+              </button>
+              <button
+                className="modal-btn modal-btn-confirm"
+                onClick={() => {
+                  if (!referenceModal.reference.trim()) {
+                    alert("Please enter a goal description.");
+                    return;
+                  }
+                  postMessage({
+                    type: "setBlockReference",
+                    path: referenceModal.blockPath,
+                    reference: referenceModal.reference,
+                    location: referenceModal.location,
+                  });
+                  setReferenceModal({
+                    open: false,
+                    blockPath: "",
+                    reference: "",
+                    location: "workflowBeforeEditing",
+                  });
+                }}
+              >
+                Save Goal
               </button>
             </div>
           </div>

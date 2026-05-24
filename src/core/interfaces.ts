@@ -26,8 +26,7 @@ export interface PromptBlock {
   variables?: Record<string, string>;
   isGoal?: boolean;
   hasGoal?: boolean;
-  isAlwaysGoal?: boolean;
-  referenceLocation?: 'workflowFirstTurn' | 'workflowEveryChange' | 'workflowBeforeEditing' | 'workflowEndOfTask' | 'workflow' | 'pre' | 'remark' | 'none';
+  referenceLocation?: 'workflowFirstTurn' | 'workflowEveryChange' | 'workflowBeforeEditing' | 'workflowEndOfTask' | 'workflow' | 'remark' | 'none';
   reference?: string;
 }
 
@@ -67,6 +66,8 @@ export interface SessionData {
     variables?: Record<string, string>;
     isGoal?: boolean;
     hasGoal?: boolean;
+    reference?: string;
+    referenceLocation?: string;
   }>;
   timestamp: string;
   fileMap?: Record<string, string>;

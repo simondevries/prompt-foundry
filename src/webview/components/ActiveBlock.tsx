@@ -42,7 +42,7 @@ const ActiveBlock: React.FC<ActiveBlockProps> = ({ block, onEdit, onRemove, onTo
             }}>
               {blockCategory}
             </span>
-            {block.hasGoal && !block.isAlwaysGoal && (
+            {block.hasGoal && (
               <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                 <span 
                   className={`icon codicon codicon-star-${block.isGoal ? 'full' : 'empty'}`}
@@ -56,8 +56,12 @@ const ActiveBlock: React.FC<ActiveBlockProps> = ({ block, onEdit, onRemove, onTo
                         setTimeout(() => setShowMaxError(false), 2000);
                         return;
                       }
-                      setShowFeedback(true);
-                      setTimeout(() => setShowFeedback(false), 2000);
+                      
+                      // Only show immediate feedback if it won't open a modal
+                      if (block.reference) {
+                        setShowFeedback(true);
+                        setTimeout(() => setShowFeedback(false), 2000);
+                      }
                     }
                     onToggleGoal(block.path);
                   }}

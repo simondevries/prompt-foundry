@@ -12,9 +12,19 @@
   </a>
 </div>
 
-AI goes off the rails in large codebases. It forgets conventions, ignores architecture, and needs constant steering. Prompt Foundry fixes that with composable prompt blocks, behavioral guardrails, and a knowledge library that updates itself through your AI sessions. Works with any AI tool - Claude, Cursor, Copilot, and others.
+Build better AI prompts from reusable blocks, directly in VSCode (and forks). Works with any AI tool - Claude, Cursor, Copilot, and others (No auth needed).
+
+| Problem | How Foundry handles it |
+| :--- | :--- |
+| AI doesn't behave how I want it | AI Contract defines role, style, and behavioral expectations upfront |
+| Knowledge from AI sessions gets lost | MCP server lets the AI write improvements back to your block library |
+| `agents.md` bloats with instructions for every scenario, causing conflicts | Task-specific prompt blocks keep context lean and targeted |
+| Some instructions matter more than others | Star a block to surface it as a key goal, or set a reference to position it at the right point in the workflow |
+| Need to give the AI the right context | Git diffs, IDE diagnostics, and live focus capture what the AI needs without copy-pasting |
 
 ## Benchmark
+
+The Ai was asked to make a TUI version of prompt foundry.
 
 Run #1 is a baseline prompt. Run #2 uses Prompt Foundry. Both use Gemini Flash Lite 3.1.
 
@@ -95,7 +105,7 @@ The live focus (⚡) button lets you select files and lines in the IDE and adds 
 Broken down into categories, one per folder, plus a set of special categories. Optionally add your Claude or Cursor skills too.
 
 #### References
-Each prompt block can include a short reference - a reminder that gets injected into the workflow section of the prompt at a specific moment. Rather than listing all instructions upfront and hoping the AI remembers them, references tell the AI *when* to act on an instruction. This has been shown to improve adherence.
+Each prompt block can include a short reference - a reminder that gets compiled into a specific position in the prompt. This controls *where* in the workflow the AI sees the reminder, rather than dumping all instructions in one place.
 
 ```markdown
 <!--
@@ -104,9 +114,9 @@ Each prompt block can include a short reference - a reminder that gets injected 
 -->
 ```
 
-`referenceLocation` controls when the reminder fires:
+`referenceLocation` controls where in the compiled prompt the reminder appears:
 
-| Value | When |
+| Value | Position |
 | :--- | :--- |
 | `workflowFirstTurn` | Start of the first turn |
 | `workflowEveryChange` | Before every code change |

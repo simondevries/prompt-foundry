@@ -190,15 +190,13 @@ export class LibraryManager {
     const RESERVED_METADATA_KEYS = [
       'referencelocation',
       'reference',
-      'alwaysgoal',
       'isspecial'
     ];
 
     const RESERVED_VAR_NAMES = [
       'blockname',
       'referencelocation',
-      'reference',
-      'alwaysgoal'
+      'reference'
     ];
 
     for (const match of matches) {

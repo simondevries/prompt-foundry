@@ -7,7 +7,8 @@ export interface Block {
   isSpecial?: boolean;
   isGoal?: boolean;
   hasGoal?: boolean;
-  isAlwaysGoal?: boolean;
+  reference?: string;
+  referenceLocation?: string;
   style?: {
     color: string;
     borderColor: string;
