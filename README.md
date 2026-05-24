@@ -1,40 +1,34 @@
 <div align="center">
   <img src="assets/150.png" alt="Prompt Foundry Logo" width="150" />
   <h1>Prompt Foundry</h1>
+  <br />
+  <img src="https://img.shields.io/github/languages/count/simondevries/prompt-foundry" alt="GitHub language count" />
+  <img src="https://img.shields.io/github/languages/top/simondevries/prompt-foundry?color=yellow" alt="GitHub top language" />
+  <img src="https://img.shields.io/github/forks/simondevries/prompt-foundry?style=social" alt="GitHub forks" />
+  <img src="https://img.shields.io/github/stars/simondevries/prompt-foundry?style=social" alt="GitHub Repo stars" />
+  <br />
+  <a href="https://marketplace.visualstudio.com/items?itemName=sdevries.prompt-foundry">
+    <img src="https://img.shields.io/badge/VS%20Code-Install-blue?logo=visual-studio-code" alt="Install from VS Code Marketplace" />
+  </a>
 </div>
 
-Rapidly compile more effective prompts and specs. Select from a library of prompt blocks ("how to", "information", "restrictions"), highlight the most important instructions, provide guiderails for the AI. Build and manage your library of prompt blocks, keeping it up to date with the MCP self learning loop.
-
-## Table of Contents
-- [Benefits](#benefits)
-- [Overview](#overview)
-- [Demo](#demo)
-- [Benchmark](#benchmark)
-- [Setup](#setup)
-  - [Extension setup](#extension-setup)
-  - [MCP setup](#mcp-setup)
-- [Features](#features)
-  - [Instructions prompt](#instructions-prompt)
-  - [Prompt blocks](#prompt-blocks)
-  - [Prompt block groups](#prompt-block-groups)
-- [License & Privacy](#license--privacy)
-- [Feedback](#feedback)
+Rapidly compile more effective prompts and specs. Select from a library of prompt blocks ("how to", "information", "restrictions"), highlight the most important instructions, and provide guardrails for the AI. Build and manage your library of prompt blocks, keeping it up to date with the MCP self-learning loop.
 
 ## Benefits:
-* **Provide task context, prescribe AI behaviour** Provide AI with a clearer set of instructions and expectations. Since you can quickly write a highly specific prompt, you can move information out of agents.md files and reduce this context bloat. Ultimately this reduces the changes of conflicting information being passed into AI.
+* **Provide task context, prescribe AI behaviour:** Provide the AI with a clearer set of instructions and expectations. Since you can quickly write a highly specific prompt, you can move information out of agents.md files and reduce this context bloat. Ultimately, this reduces the chances of conflicting information being passed into the AI. See benchmark results [here](https://github.com/simondevries/prompt-foundry#benchmark)
 
-* **Build and evolve a knowledge library** Use the local MCP server to let AI update your prompt block library. Knowledge library that stays up to date. Have a central repository for your information.
+* **Build and evolve a knowledge library:** Use the local MCP server to let the AI update your prompt block library. A knowledge library that stays up to date allows you to have a central repository for your information.
 
-* **Liquid syntax** Use the templating engine to quickly customize the prompt blocks according to your current task
+* **Liquid syntax:** Use the templating engine to quickly customize the prompt blocks according to your current task.
 
-* **Git & tools** The record selection feature adds the current selection to the AI prompt (enables dictation while navigating).
+* **Git & tools:** The record selection feature adds the current selection to the AI prompt (enables dictation while navigating).
 
 ## Overview:
 1. Type your prompt
 2. Select your prompt blocks (instructions and information)
 3. Select your most important ones as goals
 4. Copy/send to AI!
-5. Use the MCP server for AI to update any blocks at the end
+5. Use the MCP server for the AI to update any blocks at the end
 
 <img src="assets/screenshot_overview.png" alt="Example prompt" >
 <img src="assets/example_prompt.png" alt="Example prompt" >
@@ -53,28 +47,25 @@ Rapidly compile more effective prompts and specs. Select from a library of promp
 
 ## Benchmark
 *Run #1 Baseline test* 
-Prompt on it's own using Gemini flash lite 3.1. [details link](https://github.com/simondevries/prompt-foundry/commit/3126169a48daa651567340c4127fcb4afb0f14dc#diff-dedd314698bfcab1f61269c945458e105db17cbbf27163bf6e5bebdab2a99cad)
-
+Prompt on its own using Gemini Flash Lite 3.1. [details link](https://github.com/simondevries/prompt-foundry/commit/3126169a48daa651567340c4127fcb4afb0f14dc#diff-dedd314698bfcab1f61269c945458e105db17cbbf27163bf6e5bebdab2a99cad)
 
 *Run #2*
-Prompt compiled with prompt forge using Gemini flash lite 3.1 [details link](https://github.com/simondevries/prompt-foundry/commit/ec1343262bf392c12db477a2a78f5d3a817bb735) 
-
+Prompt compiled with Prompt Foundry using Gemini Flash Lite 3.1. [details link](https://github.com/simondevries/prompt-foundry/commit/ec1343262bf392c12db477a2a78f5d3a817bb735) 
 
 | Run | Achieved Task | Code Structure | Handholding | Steering Prompts | Remaining Sig. Bugs | 
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **#1 Baseline** | Yes | 1 large component,  | Yes (had to re-align) | 6 | Scrolling bug |
+| **#1 Baseline** | Yes | 1 large component | Yes (had to re-align) | 6 | Scrolling bug |
 | **#2 Foundry** | Yes |  3 components, 1 test | Minimal (errors/next steps) | 5 |  |
 
 ### Run 2 - Instruction Adherence
-In addition to the results above, we see the AI in the foundry run followed instructions in the prompt blocks. Generating code according to style
+In addition to the results above, we see the AI in the Foundry run followed instructions in the prompt blocks. Generating code according to style.
 
 | Make a Plan | Used Information | TDD Approach | Code Comments | Added Logs |
 | :--- | :--- | :--- | :--- | :--- |
 | ✓ including all sections | ✓ Used to stay on track | Attempted | ✓ Some added | ✓ Logs |
 
-
 <details>
-<summary>Ai comparison of diffs</summary>
+<summary>AI comparison of diffs</summary>
 
 Both runs used `ink` (React-based TUI) and `clipboardy`. The architectural differences matter most if this TUI is to share a core backend with the VSCode extension — which is the intended direction.
 
@@ -86,42 +77,41 @@ In short: Run #1 works but accumulates debt. Run #2 reflects an understanding of
 
 </details>
 
-
 ## Setup
 
 ### Extension setup
-Once you have installed the extension from the vscode marketplace, you can immediately start building prompts. If you want to add or edit the prompt templates, you will need to allow the extension to create a prompt library somewhere on the file system. 
+Once you have installed the extension from the VS Code marketplace, you can immediately start building prompts. If you want to add or edit the prompt templates, you will need to allow the extension to create a prompt library somewhere on the file system. 
 
-You can modify the location of this path through the settings gear next to the prompt blocks or via the vscode settings panel.
+You can modify the location of this path through the settings gear next to the prompt blocks or via the VS Code settings panel.
 
-> Note: In order to avoid a permissions error, when editing the extension from the editor you have to open that prompt library folder in vscode and click 'trust'. You can manually check the folder's contents easily as it just contains .md files and the prompts settings files.
+> Note: In order to avoid a permissions error, when editing the extension from the editor you have to open that prompt library folder in VS Code and click 'trust'. You can manually check the folder's contents easily as it just contains .md files and the prompt settings files.
 
 ### MCP setup
-To setup the MCP server click on the settings gear in the app and click setup MCP server. This will provide you a JSON config you can paste into your AI's MCP settings. Note that the PROMPT_ROOT env setting should refer to the location of your prompt library folder.
+To set up the MCP server, click on the settings gear in the app and click "Setup MCP server". This will provide you a JSON config you can paste into your AI's MCP settings. Note that the PROMPT_ROOT env setting should refer to the location of your prompt library folder.
 
 Setup:
 1. Open the extension
-1. Click the gear next to `Prompt Block Library` 
-1. Click `Setup MCP Server...` 
-1. Copy the JSON snippet.
-1. Add it to your AI's MCP config
+2. Click the gear next to `Prompt Block Library` 
+3. Click `Setup MCP Server...` 
+4. Copy the JSON snippet.
+5. Add it to your AI's MCP config
 
-> Note: The MCP server runs locally as a nodeJS process which is located in the vscode extension folder. Please be aware that the AI is able to read and modify the content of the specified prompt library folder via MCP tool calls.
+> Note: The MCP server runs locally as a nodeJS process which is located in the VS Code extension folder. Please be aware that the AI is able to read and modify the content of the specified prompt library folder via MCP tool calls.
 
 ## Features
 
 ### Instructions prompt
 Enter your main instructional prompt into the top instruction box. 
 
-Pressing the live focus (⚡) button will allow you to select files and lines in the IDE and have the associated locations be added to the prompt. This is especially useful as you can dictate to the computer while navigating around the codebase and you should end up with contextual file tags as you navigate - it creates a similar experience to someone watching your screen as you explain. 
+Pressing the live focus (⚡) button will allow you to select files and lines in the IDE and have the associated locations be added to the prompt. This is especially useful as you can dictate to the computer while navigating around the codebase, and you should end up with contextual file tags as you navigate - it creates a similar experience to someone watching your screen as you explain. 
 
 ### Prompt blocks
 Prompt blocks are broken down into categories; one for each folder and also a set of special categories (bottom). 
 
 #### References:
-The generated prompt is broken into two sections: XML blocks of prompt blocks at the top, and Markdown for the the main prompt at the bottom.
+The generated prompt is broken into two sections: XML blocks of prompt blocks at the top, and Markdown for the main prompt at the bottom.
 
-Prompt forget adds key reminders to the ai, in the bottom markdown section, to perform the task in the prompt blocks above. 
+Prompt Foundry adds key reminders to the AI, in the bottom markdown section, to perform the task in the prompt blocks above. 
 
 The text that gets added by the main block is determined by the following text in the prompt block.
 
@@ -135,14 +125,12 @@ The `referenceLocation` determines where the goal is injected in the prompt (e.g
 
 
 #### Goals
-To highlight a task a being particuarly important, prompt foundry adds the ability to mark blocks as a Goal. 
+To highlight a task as being particularly important, Prompt Foundry adds the ability to mark blocks as a Goal.
 
-Once added as a goal, the reference text gets added to a special section at the end of the prompt `# Key goals for while completing this task:`
-
+Once added as a goal, the reference text gets added to a special section at the end of the prompt: # Key goals for while completing this task:
 
 #### Liquid syntax:
-Prompt templates support liquid templating syntax. This is especially useful if you have a prompt for a specific purpose where you want to add some custom instructions. For example:
-
+Prompt templates support Liquid templating syntax. This is especially useful if you have a prompt for a specific purpose where you want to add some custom instructions. For example:
 ```liquid
 {% comment %}
 vars:
