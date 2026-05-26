@@ -79,6 +79,11 @@
           "default": false,
           "description": "Show Cursor rules and .mdc files as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .cursor/ directory."
         },
+        "promptForge.showWorkspaceSkills": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show skills from your workspace as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .skills/ or skills/ directories."
+        },
         "promptForge.historyRetentionLimit": {
           "type": "number",
           "default": 50,

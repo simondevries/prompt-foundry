@@ -5,6 +5,7 @@ import {
   CLAUDE_SKILLS_DIR,
   CLAUDE_COMMANDS_DIR,
   CURSOR_RULES_DIR,
+  WORKSPACE_SKILLS_DIRS,
   getGroupsFile,
 } from "./constants";
 import { SPECIAL_TOOLS } from "./tools";
@@ -25,6 +26,7 @@ export class LibraryManager {
   public getPromptLibrary(
     showClaudeCodePromptBlocks: boolean = false,
     showCursorRules: boolean = false,
+    workspaceSkillsDirBase?: string,
   ): PromptLibraryCategory[] {
     const categories: PromptLibraryCategory[] = [];
     if (!this._fs.existsSync(this._promptBuilderDir)) {
@@ -69,6 +71,24 @@ export class LibraryManager {
         const files = this.getPromptFiles(CURSOR_RULES_DIR);
         if (files.length > 0) this.addCategory(categories, "Cursor", CURSOR_RULES_DIR, files, "tool", false);
       }
+    }
+
+    // Collect all workspace skill files first
+    const workspaceSkillFiles: { name: string; path: string }[] = [];
+    for (const dirName of WORKSPACE_SKILLS_DIRS) {
+      const workspaceSkillsDir = workspaceSkillsDirBase ? path.join(workspaceSkillsDirBase, dirName) : undefined;
+      if (workspaceSkillsDir && this._fs.existsSync(workspaceSkillsDir)) {
+          const files = this.getPromptFiles(workspaceSkillsDir);
+          for (const file of files) {
+            workspaceSkillFiles.push({ name: file, path: workspaceSkillsDir });
+          }
+      }
+    }
+
+    if (workspaceSkillFiles.length > 0) {
+        // We only add one category to avoid duplicate names in UI
+        const workspaceDirName = "Skills (workspace)";
+        this.addCategory(categories, workspaceDirName, workspaceSkillsDirBase || "", workspaceSkillFiles.map(f => f.name), "tool", false);
     }
 
     this.addCategory(categories, "Tools", "", SPECIAL_TOOLS.map(t => t.displayName), "tool", false);

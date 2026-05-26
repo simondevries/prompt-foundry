@@ -4,9 +4,9 @@ import { PromptManager } from "../core/promptManager";
 import { StyleManager } from "../core/styleManager";
 import { SecureFileSystem, FsPermission } from "../core/fs";
 import { 
-  DEFAULT_PROMPT_BUILDER_DIR,
   CLAUDE_DIR,
-  CURSOR_DIR 
+  CURSOR_DIR,
+  WORKSPACE_SKILLS_DIRS,
 } from "../core/constants";
 import { getPromptBuilderDir } from "./utils";
 import {
@@ -71,6 +71,28 @@ export function activate(context: vscode.ExtensionContext) {
     context.extensionPath,
     false, // Disable native watcher in VS Code; use vscode.FileSystemWatcher instead
   );
+  
+  const workspaceRoot = vscode.workspace.workspaceFolders
+  ? vscode.workspace.workspaceFolders[0].uri.fsPath
+  : undefined;
+
+  const trustWorkspaceSkills = (shouldTrust: boolean) => {
+      if (!workspaceRoot) return;
+      for (const dirName of WORKSPACE_SKILLS_DIRS) {
+          const skillsDir = path.join(workspaceRoot, dirName);
+          if (shouldTrust) {
+            secureFs.trustPath(skillsDir, FsPermission.Read);
+          } else {
+            secureFs.untrustPath(skillsDir);
+          }
+      }
+  };
+
+  if (config.get<boolean>("showWorkspaceSkills") && workspaceRoot) {
+    trustWorkspaceSkills(true);
+    promptManager.setWorkspaceSkillsDir(workspaceRoot);
+  }
+
   const webviewProvider = new MainPromptWebviewProvider(
     context.extensionUri,
     promptManager,
@@ -135,6 +157,18 @@ export function activate(context: vscode.ExtensionContext) {
           secureFs.trustPath(CURSOR_DIR, FsPermission.Read);
         } else {
           secureFs.untrustPath(CURSOR_DIR);
+        }
+        webviewProvider.refresh();
+      }
+
+      if (e.affectsConfiguration("promptForge.showWorkspaceSkills")) {
+        const config = vscode.workspace.getConfiguration("promptForge");
+        if (config.get<boolean>("showWorkspaceSkills") && workspaceRoot) {
+          trustWorkspaceSkills(true);
+          promptManager.setWorkspaceSkillsDir(workspaceRoot);
+        } else if (workspaceRoot) {
+          trustWorkspaceSkills(false);
+          promptManager.setWorkspaceSkillsDir(undefined);
         }
         webviewProvider.refresh();
       }

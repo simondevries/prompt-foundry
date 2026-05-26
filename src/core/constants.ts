@@ -56,3 +56,5 @@ export const CLAUDE_COMMANDS_DIR = path.join(CLAUDE_DIR, "commands");
 // Cursor paths
 export const CURSOR_DIR = path.join(os.homedir(), ".cursor");
 export const CURSOR_RULES_DIR = path.join(CURSOR_DIR, "rules");
+
+export const WORKSPACE_SKILLS_DIRS = [".skills", "skills"];

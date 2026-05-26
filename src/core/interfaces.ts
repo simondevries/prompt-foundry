@@ -67,7 +67,7 @@ export interface SessionData {
     isGoal?: boolean;
     hasGoal?: boolean;
     reference?: string;
-    referenceLocation?: string;
+    referenceLocation?: 'workflowFirstTurn' | 'workflowEveryChange' | 'workflowBeforeEditing' | 'workflowEndOfTask' | 'workflow' | 'remark' | 'none';
   }>;
   timestamp: string;
   fileMap?: Record<string, string>;

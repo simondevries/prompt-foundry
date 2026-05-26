@@ -1281,6 +1281,25 @@ const App: React.FC = () => {
                 <span>Show Cursor Items</span>
               </div>
             </div>
+
+            <div
+              className="history-item"
+              onClick={() => {
+                postMessage({
+                  type: "toggleWorkspaceSkills",
+                });
+                setSettingsOpen(false);
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span
+                  className={`codicon codicon-${state.settings.showWorkspaceSkills ? "check" : "blank"}`}
+                ></span>
+                <span>Show Skills from workspace</span>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1765,6 +1784,29 @@ const App: React.FC = () => {
                   }
                 >
                   Configure Cursor Settings
+                </button>
+              </div>
+            ),
+          },
+          {
+            id: "workspace",
+            title: "Skills (Workspace)",
+            icon: "files",
+            content: (
+              <div>
+                <p>
+                  Allow Prompt Foundry to read skills from your current vscode workspace (<code>.skills/</code> or <code>skills/</code> directories).
+                </p>
+                <button
+                  className="main-btn"
+                  onClick={() =>
+                    postMessage({
+                      type: "openSettings",
+                      setting: "promptForge.showWorkspaceSkills",
+                    })
+                  }
+                >
+                  Configure Workspace Settings
                 </button>
               </div>
             ),

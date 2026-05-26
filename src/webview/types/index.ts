@@ -71,6 +71,7 @@ export interface State {
     promptFolder: string;
     showClaudeCodeBlocks: boolean;
     showCursorRules: boolean;
+    showWorkspaceSkills: boolean;
   };
   appName: string;
   lastAction: 'copy' | 'send' | 'append' | null;

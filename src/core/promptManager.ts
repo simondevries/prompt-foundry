@@ -7,6 +7,7 @@ import {
   CLAUDE_DIR,
   CURSOR_DIR,
   BUNDLED_CATEGORIES,
+  WORKSPACE_SKILLS_DIRS,
 } from "./constants";
 import { StyleManager } from "./styleManager";
 import {
@@ -23,6 +24,15 @@ import { SessionManager } from "./sessionManager";
 import { createPatch } from "diff";
 
 export class PromptManager {
+  private _workspaceSkillsDir?: string;
+
+  public setWorkspaceSkillsDir(dir: string | undefined) {
+    this._workspaceSkillsDir = dir;
+  }
+
+  public getWorkspaceSkillsDir(): string | undefined {
+    return this._workspaceSkillsDir;
+  }
   private _mainInstruction: string = "";
   private _mainFileMap: Record<string, string> = {};
   private _mainCollidedNames: Record<string, boolean> = {};
@@ -394,9 +404,9 @@ export class PromptManager {
 
   public getPromptBlockContent(category: string, fileName: string): string {
     // Virtual categories don't have files on disk
-    if (category === "Claude Skills") {
-      const skillName = fileName.replace(/\.md$/, "");
-      return `You must use the ${skillName} skill.`;
+    if (category === "Claude Skills" || category === "Skills (workspace)") {
+        const skillName = fileName.replace(/\.md$/, "");
+        return `You must use the ${skillName} skill.`;
     }
 
     if (category === "Tools") {
@@ -417,6 +427,14 @@ export class PromptManager {
     try {
       if (this._fs.existsSync(filePath)) {
         return this._fs.readFileSync(filePath, "utf8").toString();
+      } else if (category === "Skills (workspace)" && this._workspaceSkillsDir) {
+          // Fallback resolution for aggregated workspace skills
+          for (const dirName of WORKSPACE_SKILLS_DIRS) {
+              const altPath = path.join(this._workspaceSkillsDir, dirName, fileName);
+              if (this._fs.existsSync(altPath)) {
+                  return this._fs.readFileSync(altPath, "utf8").toString();
+              }
+          }
       }
     } catch (e) {
       console.error(`Failed to read block content: ${category}/${fileName}`, e);
@@ -515,6 +533,7 @@ export class PromptManager {
     return this._libraryManager.getPromptLibrary(
       showClaudeCodePromptBlocks,
       showCursorRules,
+      this._workspaceSkillsDir,
     );
   }
 
@@ -553,7 +572,7 @@ export class PromptManager {
       let content = "";
       let isSpecial = false;
 
-      if (category === "Claude Skills") {
+      if (category === "Claude Skills" || category === "Skills (workspace)") {
         const skillName = filename.replace(/\.md$/, "");
         content = `You must use the ${skillName} skill.`;
         isSpecial = true;

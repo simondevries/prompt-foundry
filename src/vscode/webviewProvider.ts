@@ -363,6 +363,11 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           this.refresh();
           this.sendPromptBlocksSettings();
           break;
+        case "toggleWorkspaceSkills":
+          await this.toggleWorkspaceSkills();
+          this.refresh();
+          this.sendPromptBlocksSettings();
+          break;
         case "toggleCursorRules":
           await this.toggleCursorRules();
           this.refresh();
@@ -1217,12 +1222,14 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
         false,
       );
       const showCursorRules = config.get<boolean>("showCursorRules", false);
+      const showWorkspaceSkills = config.get<boolean>("showWorkspaceSkills", false);
       this.view.webview.postMessage({
         type: "updatePromptBlocksSettings",
         settings: {
           promptFolder: this._promptManager.getPromptBuilderDir(),
           showClaudeCodeBlocks,
           showCursorRules,
+          showWorkspaceSkills,
         },
       });
     }
@@ -1233,6 +1240,16 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
     const current = config.get<boolean>("showClaudeCodeBlocks", false);
     await config.update(
       "showClaudeCodeBlocks",
+      !current,
+      vscode.ConfigurationTarget.Global,
+    );
+  }
+
+  private async toggleWorkspaceSkills() {
+    const config = vscode.workspace.getConfiguration("promptForge");
+    const current = config.get<boolean>("showWorkspaceSkills", false);
+    await config.update(
+      "showWorkspaceSkills",
       !current,
       vscode.ConfigurationTarget.Global,
     );
