@@ -43,6 +43,10 @@ export class PromptManager {
   private _sessionManager: SessionManager;
   private _fs: SecureFileSystem;
 
+  public get mainInstruction(): string {
+    return this._mainInstruction;
+  }
+
   public setHistoryRetentionLimit(limit: number): void {
     this._sessionManager.setHistoryRetentionLimit(limit);
   }
@@ -458,7 +462,6 @@ export class PromptManager {
 
       try {
         if (this._fs.existsSync(block.path)) {
-          console.log("Reloading block content from disk:", block.path);
           const content = this._fs.readFileSync(block.path, "utf8").toString();
           block.content = content;
           const result = this.parseBlockMetadata(content);

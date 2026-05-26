@@ -103,7 +103,6 @@ export class SessionManager {
         for (const file of toDelete) {
           this._fs.unlinkSync(file.filepath);
         }
-        console.log(`Pruned ${toDelete.length} old history sessions`);
       }
     } catch (e) {
       console.error("Failed to prune history", e);
