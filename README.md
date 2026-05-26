@@ -24,9 +24,7 @@ Build better AI prompts from reusable blocks, directly in VSCode (and forks). Wo
 
 ## Benchmark
 
-The Ai was asked to make a TUI version of prompt foundry.
-
-Run #1 is a baseline prompt. Run #2 uses Prompt Foundry. Both use Gemini Flash Lite 3.1.
+The AI was asked to make a TUI version of Prompt Foundry. Run #1 is a baseline prompt. Run #2 uses Prompt Foundry. Both use Gemini Flash Lite 3.1.
 
 The key differences: better code structure and far less handholding.
 
@@ -78,7 +76,7 @@ In short: Run #1 works but accumulates debt. Run #2 reflects an understanding of
 ## Setup
 
 ### Extension
-Install from the VS Code marketplace. To add or edit prompt templates, allow the extension to create a prompt library on your file system. Set the location via the gear icon next to prompt blocks or through VS Code settings.
+Install from the VS Code marketplace. The extension includes a default block library to get you started. Blocks are read-only until you create your own prompt library directory - set the location via the gear icon next to prompt blocks or through VS Code settings.
 
 > Note: When editing from the editor you need to open the prompt library folder in VS Code and click 'trust'. The folder only contains `.md` files and prompt settings files.
 
@@ -102,17 +100,24 @@ Enter your main instructional prompt into the top instruction box.
 The live focus (⚡) button lets you select files and lines in the IDE and adds those locations to the prompt. Useful for dictating while navigating a codebase - you end up with contextual file tags as you navigate, similar to someone watching your screen as you explain.
 
 ### Prompt blocks
-Broken down into categories, one per folder, plus a set of special categories. Optionally add your Claude or Cursor skills too.
-
-#### References
-Each prompt block can include a short reference - a reminder that gets compiled into a specific position in the prompt. This controls *where* in the workflow the AI sees the reminder, rather than dumping all instructions in one place.
+A prompt block is a markdown file with a chunk of reusable instructions or information. Here is a simple example:
 
 ```markdown
+# Code style
+- Use TypeScript strict mode
+- Prefer named exports over default exports
+- Add JSDoc comments to all public functions
+
 <!--
-# reference: Ensure the code has been refactored by the end of the task
+# reference: Check the code follows the style guide before finishing
 # referencelocation: workflowEndOfTask
 -->
 ```
+
+Blocks are organised into categories, one per folder, plus a set of special categories. Optionally add your Claude or Cursor skills too.
+
+#### References
+A block can include a short reference - a reminder compiled into a specific position in the prompt. This controls *where* in the workflow the AI sees it, rather than dumping all instructions in one place.
 
 `referenceLocation` controls where in the compiled prompt the reminder appears:
 
