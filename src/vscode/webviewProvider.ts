@@ -279,6 +279,15 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           }
           vscode.commands.executeCommand("prompt-forge.sendToAI", prompt);
           break;
+        case "appendPrompt":
+          const appendText = await this._compileCurrentPrompt();
+          try {
+            this._promptManager.saveCurrentSession();
+          } catch (e) {
+            console.error("Failed to auto-save session after appendPrompt", e);
+          }
+          vscode.commands.executeCommand("prompt-forge.appendToActiveEditor", appendText);
+          break;
         case "copyPrompt":
           const copyText = await this._compileCurrentPrompt();
           vscode.env.clipboard.writeText(copyText);

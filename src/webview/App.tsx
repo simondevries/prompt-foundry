@@ -211,6 +211,7 @@ const App: React.FC = () => {
   const {
     handleCopy,
     handleSend,
+    handleAppend,
     handleClear,
     handleAddCurrentFile,
     handleAddGroup,
@@ -973,7 +974,13 @@ const App: React.FC = () => {
                     icon: "send",
                     onClick: handleSend,
                   }
-                : { label: "Copy Context", icon: "copy", onClick: handleCopy };
+                : currentActionType === "append"
+                  ? {
+                      label: "Append to File",
+                      icon: "edit",
+                      onClick: handleAppend,
+                    }
+                  : { label: "Copy Context", icon: "copy", onClick: handleCopy };
 
             const secondaryActions = [
               {
@@ -990,6 +997,14 @@ const App: React.FC = () => {
                 icon: "send",
                 onClick: () => {
                   updateState({ lastAction: "send" });
+                },
+              },
+              {
+                id: "append",
+                label: "Append to File",
+                icon: "edit",
+                onClick: () => {
+                  updateState({ lastAction: "append" });
                 },
               },
               {

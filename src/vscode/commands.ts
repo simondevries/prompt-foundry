@@ -66,6 +66,38 @@ export function registerCommands(
   );
 
   context.subscriptions.push(sendPromptCommand, editPromptCommand);
+
+  // Command to append text to the active editor
+  const appendToActiveEditorCommand = vscode.commands.registerCommand(
+    "prompt-forge.appendToActiveEditor",
+    async (text: string) => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage("No active editor found to append to.");
+        return;
+      }
+
+      try {
+        const selection = editor.selection;
+        await editor.edit((editBuilder) => {
+          if (selection.isEmpty) {
+            // If cursor is at end of line or somewhere, just insert.
+            // If they want end of file specifically if not selected, we can do that.
+            // "this adds to the current cursor, or else at the end of the file"
+            // Usually cursor IS at the end if they just opened it, but let's be precise.
+            editBuilder.insert(selection.active, text);
+          } else {
+            editBuilder.replace(selection, text);
+          }
+        });
+        vscode.window.showInformationMessage("Prompt appended to file!");
+      } catch (error: any) {
+        vscode.window.showErrorMessage(`Failed to append to file: ${error.message}`);
+      }
+    }
+  );
+
+  context.subscriptions.push(appendToActiveEditorCommand);
 }
 
 export function setupFileWatcher(

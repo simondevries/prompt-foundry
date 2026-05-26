@@ -44,6 +44,20 @@ export function useAppActions({
         }
     }, [state.mainInstruction, state.isUserInitializedLibrary, postMessage, updateState, clearAutoSaveTimers, setShowRestore]);
 
+    const handleAppend = useCallback(() => {
+        postMessage({
+            type: "updateMainInstruction",
+            value: state.mainInstruction,
+        });
+        postMessage({ type: "appendPrompt" });
+        updateState({ lastAction: "append" });
+        clearAutoSaveTimers();
+        if (state.isUserInitializedLibrary) {
+            postMessage({ type: "clearAndResetUI" });
+            setShowRestore(true);
+        }
+    }, [state.mainInstruction, state.isUserInitializedLibrary, postMessage, updateState, clearAutoSaveTimers, setShowRestore]);
+
     const handleClear = useCallback(() => {
         updateState({ mainInstruction: "" });
         postMessage({ type: "updateMainInstruction", value: "" });
@@ -61,6 +75,7 @@ export function useAppActions({
     return {
         handleCopy,
         handleSend,
+        handleAppend,
         handleClear,
         handleAddCurrentFile,
         handleAddGroup

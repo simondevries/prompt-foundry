@@ -73,7 +73,7 @@ export interface State {
     showCursorRules: boolean;
   };
   appName: string;
-  lastAction: 'copy' | 'send' | null;
+  lastAction: 'copy' | 'send' | 'append' | null;
   fileMap: Record<string, string>;
   collidedNames: Record<string, boolean>;
   followActiveFile: boolean;
