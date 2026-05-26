@@ -43,6 +43,10 @@ export class PromptManager {
   private _sessionManager: SessionManager;
   private _fs: SecureFileSystem;
 
+  public get activeBlocks(): PromptBlock[] {
+    return this._activeBlocks;
+  }
+
   public setHistoryRetentionLimit(limit: number): void {
     this._sessionManager.setHistoryRetentionLimit(limit);
   }
