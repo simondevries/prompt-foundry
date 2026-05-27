@@ -1423,7 +1423,7 @@ const App: React.FC = () => {
           groups={state.groupLibrary}
           onSelectGroup={(group) => {
             if (checkPermission("folder"))
-              postMessage({ type: "selectAgent", agent: group });
+              handleAddGroup(group.name);
           }}
           onDeleteGroup={(name) => {
             if (checkPermission("folder")) {
