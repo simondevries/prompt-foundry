@@ -27,7 +27,8 @@ cd "$PROJECT_DIR"
 clear
 # Run using node import tsx directly
 node --import tsx src/tui/index.tsx "$TEMP_FILE"
-sleep 0.1
+# Auto-close the terminal window on exit
+osascript -e 'tell application "Terminal" to close front window' &
 exit
 EOF
     # Open the TUI in a new macOS terminal window
