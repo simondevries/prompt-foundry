@@ -102,7 +102,7 @@ export const App: React.FC<AppProps> = ({ arg }) => {
 
   // Flattened blocks for search - filtered
   const allBlocks = useMemo(() => {
-    const blocks: { label: string, value: { category: string, name: string, path: string }, disabled?: boolean }[] = [];
+    const blocks: { key: string, label: string, value: { category: string, name: string, path: string }, disabled?: boolean }[] = [];
     categories.forEach(cat => {
       cat.files.forEach(file => {
         const fullPath = path.join(cat.path, file);
@@ -353,7 +353,7 @@ export const App: React.FC<AppProps> = ({ arg }) => {
                   <Text bold color="gray">Browse Categories:</Text>
                 </Box>
                 <SelectInput 
-                  items={categories.map(c => ({ label: `📁 ${c.name}`, value: c.name }))} 
+                  items={categories.map(c => ({ key: c.name, label: `📁 ${c.name}`, value: c.name }))} 
                   onSelect={handleSelectCategory}
                   limit={15}
                 />
@@ -370,9 +370,11 @@ export const App: React.FC<AppProps> = ({ arg }) => {
                   <SelectInput 
                     items={filteredCategoryFiles.map((f: string) => {
                       const disabled = isUnavailable(selectedCategory.name, f);
+                      const fullPath = path.join(selectedCategory.path, f);
                       return { 
+                        key: fullPath,
                         label: disabled ? `📄 ${f} (not available in TUI)` : `📄 ${f}`, 
-                        value: { category: selectedCategory.name, name: f, path: path.join(selectedCategory.path, f) },
+                        value: { category: selectedCategory.name, name: f, path: fullPath },
                         disabled
                       };
                     })} 
@@ -394,7 +396,7 @@ export const App: React.FC<AppProps> = ({ arg }) => {
                   {pendingBlock.vars[currentVarIndex].type === 'select' ? (
                     <Box marginTop={1}>
                       <SelectInput 
-                        items={(pendingBlock.vars[currentVarIndex].options || []).map(opt => ({ label: opt, value: opt }))}
+                        items={(pendingBlock.vars[currentVarIndex].options || []).map((opt: string) => ({ key: opt, label: opt, value: opt }))}
                         onSelect={(item) => handleVariableSubmit(item.value)}
                         limit={10}
                       />
@@ -438,7 +440,7 @@ export const App: React.FC<AppProps> = ({ arg }) => {
                 </Box>
                 {groups.length === 0 ? <Text color="gray">No groups defined.</Text> : (
                   <SelectInput 
-                    items={groups.map(g => ({ label: `  ${g.name}`, value: g }))} 
+                    items={groups.map(g => ({ key: g.name, label: `  ${g.name}`, value: g }))} 
                     onSelect={handleSelectGroup}
                     limit={15}
                   />
