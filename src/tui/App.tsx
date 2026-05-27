@@ -2,13 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
-import { PromptManager } from '../core/promptManager';
-import { StyleManager } from '../core/styleManager';
-import { SecureFileSystem } from '../core/fs';
-import { DEFAULT_PROMPT_BUILDER_DIR } from '../core/constants';
-import { PromptBlock, PromptLibraryCategory, Group } from '../core/interfaces';
+import { PromptManager } from '../core/promptManager.js';
+import { StyleManager } from '../core/styleManager.js';
+import { SecureFileSystem } from '../core/fs.js';
+import { DEFAULT_PROMPT_BUILDER_DIR } from '../core/constants.js';
+import { PromptBlock, PromptLibraryCategory, Group } from '../core/interfaces.js';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 interface AppProps {
   arg?: string;
@@ -43,6 +44,9 @@ export const App: React.FC<AppProps> = ({ arg }) => {
   
   // Focus index for Active Stack items (Section 3)
   const [selectedActiveIndex, setSelectedActiveIndex] = useState(0);
+
+  // Status message for feedback
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   // Liquid Variable Form State
   const [pendingBlock, setPendingBlock] = useState<{ category: string, name: string, content: string, vars: VariableDefinition[] } | null>(null);
@@ -105,6 +109,7 @@ export const App: React.FC<AppProps> = ({ arg }) => {
         if (!activePaths.has(fullPath)) {
           const disabled = isUnavailable(cat.name, file);
           blocks.push({ 
+            key: fullPath,
             label: disabled ? `[${cat.name}] ${file} (not available in TUI)` : `[${cat.name}] ${file}`, 
             value: { category: cat.name, name: file, path: fullPath },
             disabled
@@ -236,6 +241,21 @@ export const App: React.FC<AppProps> = ({ arg }) => {
     }
   };
 
+  const handleCopyToClipboard = () => {
+    if (!manager) return;
+    try {
+      const compiled = manager.compilePrompt();
+      // Use pbcopy on macOS
+      execSync('pbcopy', { input: compiled });
+      
+      setStatusMessage('Copied to clipboard!');
+      setTimeout(() => setStatusMessage(null), 2000);
+    } catch (e) {
+      setStatusMessage('Failed to copy to clipboard.');
+      setTimeout(() => setStatusMessage(null), 2000);
+    }
+  };
+
   // 3. Focus & Key Bindings
   useInput((input, key) => {
     if (key.ctrl && input === 'c') exit();
@@ -260,6 +280,9 @@ export const App: React.FC<AppProps> = ({ arg }) => {
       }
       if (input === 'c') {
         handleCompile();
+      }
+      if (input === 'y') {
+        handleCopyToClipboard();
       }
     }
 
@@ -326,7 +349,9 @@ export const App: React.FC<AppProps> = ({ arg }) => {
           <Box flexGrow={1} flexDirection="column" marginTop={1}>
             {focusSection === 'Library' && leftView === 'Categories' && (
               <Box flexDirection="column">
-                <Text bold color="gray" marginBottom={1}>Browse Categories:</Text>
+                <Box marginBottom={1}>
+                  <Text bold color="gray">Browse Categories:</Text>
+                </Box>
                 <SelectInput 
                   items={categories.map(c => ({ label: `📁 ${c.name}`, value: c.name }))} 
                   onSelect={handleSelectCategory}
@@ -336,12 +361,14 @@ export const App: React.FC<AppProps> = ({ arg }) => {
             )}
             {focusSection === 'Library' && leftView === 'Blocks' && selectedCategory && (
               <Box flexDirection="column">
-                <Text bold color="gray" marginBottom={1}>Blocks in {selectedCategory.name}:</Text>
+                <Box marginBottom={1}>
+                  <Text bold color="gray">Blocks in {selectedCategory.name}:</Text>
+                </Box>
                 {filteredCategoryFiles.length === 0 ? (
                   <Text color="gray">All blocks from this category are already in the stack.</Text>
                 ) : (
                   <SelectInput 
-                    items={filteredCategoryFiles.map(f => {
+                    items={filteredCategoryFiles.map((f: string) => {
                       const disabled = isUnavailable(selectedCategory.name, f);
                       return { 
                         label: disabled ? `📄 ${f} (not available in TUI)` : `📄 ${f}`, 
@@ -353,7 +380,9 @@ export const App: React.FC<AppProps> = ({ arg }) => {
                     limit={15}
                   />
                 )}
-                <Text color="gray" marginTop={2}>[Esc] Return to categories</Text>
+                <Box marginTop={2}>
+                  <Text color="gray">[Esc] Return to categories</Text>
+                </Box>
               </Box>
             )}
             {leftView === 'VariableInput' && pendingBlock && (
@@ -380,7 +409,9 @@ export const App: React.FC<AppProps> = ({ arg }) => {
                     </Box>
                   )}
                 </Box>
-                <Text color="gray" marginTop={1}>({currentVarIndex + 1}/{pendingBlock.vars.length}) [Esc] Cancel</Text>
+                <Box marginTop={1}>
+                  <Text color="gray">({currentVarIndex + 1}/{pendingBlock.vars.length}) [Esc] Cancel</Text>
+                </Box>
               </Box>
             )}
             {leftView === 'Search' && (
@@ -402,7 +433,9 @@ export const App: React.FC<AppProps> = ({ arg }) => {
             )}
             {focusSection === 'Groups' && (
               <Box flexDirection="column">
-                <Text bold color="gray" marginBottom={1}>Available Groups:</Text>
+                <Box marginBottom={1}>
+                  <Text bold color="gray">Available Groups:</Text>
+                </Box>
                 {groups.length === 0 ? <Text color="gray">No groups defined.</Text> : (
                   <SelectInput 
                     items={groups.map(g => ({ label: `  ${g.name}`, value: g }))} 
@@ -457,12 +490,16 @@ export const App: React.FC<AppProps> = ({ arg }) => {
       {/* Footer Instructions / Keyboard Shortcuts */}
       <Box marginTop={1} paddingX={2} borderStyle="classic" borderColor="gray">
         <Box flexGrow={1}>
-          <Text color="gray">
-            [1-3] Focus
-            {focusSection === 'Library' && ' | [s] Search | [Esc] Back'}
-            {focusSection === 'ActiveStack' && activeBlocks.length > 0 && ' | [↑/↓] Navigate | [g] Toggle Goal | [d] Delete Block'}
-            {' | [c] Compile & Exit | [Ctrl+C] Quit'}
-          </Text>
+          {statusMessage ? (
+            <Text color="green" bold>{statusMessage}</Text>
+          ) : (
+            <Text color="gray">
+              [1-3] Focus
+              {focusSection === 'Library' && ' | [s] Search | [Esc] Back'}
+              {focusSection === 'ActiveStack' && activeBlocks.length > 0 && ' | [↑/↓] Navigate | [g] Toggle Goal | [d] Delete Block'}
+              {' | [y] Copy | [c] Compile & Exit | [Ctrl+C] Quit'}
+            </Text>
+          )}
         </Box>
       </Box>
     </Box>
