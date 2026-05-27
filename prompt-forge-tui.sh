@@ -26,7 +26,8 @@ if [[ "$1" == "--new-window" ]]; then
 cd "$PROJECT_DIR"
 clear
 # Run using node import tsx directly
-node --import tsx src/tui/index.tsx "$TEMP_FILE"
+# Pass ORIGINAL_FILE as source and TEMP_FILE as destination
+node --import tsx src/tui/index.tsx "$ORIGINAL_FILE" "$TEMP_FILE"
 # Auto-close the terminal window on exit
 osascript -e 'tell application "Terminal" to close front window' &
 exit

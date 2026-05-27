@@ -14,5 +14,6 @@ console.error = (msg) => {
 };
 
 const arg = process.argv[2];
+const outputArg = process.argv[3];
 
-render(<App arg={arg} />);
+render(<App arg={arg} outputArg={outputArg} />);
