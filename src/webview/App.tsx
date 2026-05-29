@@ -802,6 +802,12 @@ const App: React.FC = () => {
                 placeholder="Type your main instructions here...\n '/' for commands, '@' to mention files."
               ></textarea>
 
+              {state.mainInstruction && (
+                <div className="token-counter">
+                  ~{Math.ceil(state.mainInstruction.length / 3.3)} tokens
+                </div>
+              )}
+
               {mentionState.isActive && (
                 <CommandDropdown
                   title="Files"
@@ -865,7 +871,7 @@ const App: React.FC = () => {
                   style={{
                     position: "absolute",
                     bottom: "8px",
-                    right: "12px",
+                    left: "12px",
                     fontSize: "10px",
                     opacity: 0.4,
                     pointerEvents: "none",

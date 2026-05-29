@@ -386,12 +386,13 @@ export class PromptManager {
     name: string,
     content: string = "",
   ): string {
-    if (!name.endsWith(".md")) {
-      name += ".md";
+    let fileName = name;
+    if (!fileName.toLowerCase().endsWith(".md")) {
+      fileName += ".md";
     }
 
     const catDir = path.join(this._promptBuilderDir, category);
-    const filePath = path.join(catDir, name);
+    const filePath = path.join(catDir, fileName);
 
     // Validation is now internal to writeFileSync and mkdirSync
     if (!this._fs.existsSync(catDir)) {
@@ -399,11 +400,45 @@ export class PromptManager {
     }
 
     if (this._fs.existsSync(filePath)) {
-      throw new Error(`Prompt block "${name}" already exists in "${category}"`);
+      throw new Error(
+        `Prompt block "${fileName}" already exists in "${category}"`,
+      );
     }
 
     this._fs.writeFileSync(filePath, content, "utf8");
     return filePath;
+  }
+
+  public appendPromptBlock(
+    category: string,
+    name: string,
+    contentToAppend: string,
+  ): void {
+    const folderPath = this._libraryManager.getCategoryPath(category);
+
+    let fileName = name;
+    if (!fileName.toLowerCase().endsWith(".md")) {
+      fileName += ".md";
+    }
+    const targetFile = path.join(folderPath, fileName);
+
+    if (!this._fs.existsSync(targetFile)) {
+      throw new Error(
+        `Prompt block "${fileName}" does not exist in "${category}". Use create_prompt_block first.`,
+      );
+    }
+
+    const currentContent = this._fs.readFileSync(targetFile, "utf8").toString();
+    const newContent = currentContent.endsWith("\n")
+      ? currentContent + contentToAppend
+      : currentContent + "\n" + contentToAppend;
+    this._fs.writeFileSync(targetFile, newContent, "utf8");
+
+    // Refresh active blocks if this block is active
+    const activeBlock = this._activeBlocks.find((b) => b.path === targetFile);
+    if (activeBlock) {
+      activeBlock.content = newContent;
+    }
   }
 
   public getPromptBlockContent(category: string, fileName: string): string {

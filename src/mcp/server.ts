@@ -154,11 +154,36 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             name: {
               type: "string",
               description:
-                "The filename for the new block, e.g. 'my-block.md'. Must not already exist.",
+                "The filename for the new block, e.g. 'my-block.md'.",
             },
             content: {
               type: "string",
               description: "The full markdown content of the new block.",
+            },
+          },
+          required: ["category", "name", "content"],
+        },
+      },
+      {
+        name: "append_prompt_block",
+        description:
+          "Append content to an EXISTING prompt block file. Note: This tool will NOT create a new block; the target block must already exist. This tool is ideal for maintaining a persistent 'memory', 'scratchpad', or 'task log' throughout a session.\n\nWHY USE IT: To accumulate research notes, track progress, or store recurring patterns without overwriting previous work. This allows you to have a long-term memory that survives context resets.\nWHEN TO USE: After discovering a new fact, completing a sub-task, or when you want to leave a note for your 'future self' in the next turn.\nEXAMPLE: category='Memory', name='project-notes.md', content='- [Feature X] Found that the database requires a 64-bit integer for the ID field.'",
+        inputSchema: {
+          type: "object",
+          properties: {
+            category: {
+              type: "string",
+              description:
+                "The category (folder) where the block is located. Use list_prompt_blocks to find existing categories.",
+            },
+            name: {
+              type: "string",
+              description:
+                "The filename of the block, e.g. 'task-log.md'. THE BLOCK MUST ALREADY EXIST.",
+            },
+            content: {
+              type: "string",
+              description: "The content to append to the end of the file.",
             },
           },
           required: ["category", "name", "content"],
@@ -347,6 +372,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       } catch (e: any) {
         throw new Error(`Failed to create block: ${e.message}`);
+      }
+    }
+
+    case "append_prompt_block": {
+      const category = (args as any)?.category;
+      const name = (args as any)?.name;
+      const content = (args as any)?.content;
+
+      if (typeof category !== "string" || typeof name !== "string") {
+        throw new Error("Invalid arguments: category and name must be strings");
+      }
+
+      if (BUNDLED_CATEGORIES.includes(category) || category === "Special") {
+        throw new Error(`Access denied: Category '${category}' is protected.`);
+      }
+
+      try {
+        promptManager.appendPromptBlock(category, name, content);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Successfully appended to block ${category}/${name}`,
+            },
+          ],
+        };
+      } catch (e: any) {
+        throw new Error(`Failed to append to block: ${e.message}`);
       }
     }
 
