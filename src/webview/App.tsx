@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useVsCodeApi } from "./hooks/useVsCodeApi";
 import { SectionHeader, IconButton } from "./components/Common";
 import ActiveBlock from "./components/ActiveBlock";
@@ -85,6 +85,24 @@ const App: React.FC = () => {
   const promptInputRef = useRef<HTMLTextAreaElement>(null);
 
   const [showRestore, setShowRestore] = useState(false);
+
+  const totalTokens = useMemo(() => {
+    let totalLength = state.mainInstruction.length;
+
+    // Add content from active blocks
+    state.activeBlocks.forEach((block) => {
+      if (block.content) {
+        totalLength += block.content.length;
+      }
+      // Estimate overhead for tags and formatting
+      totalLength += 50; // Headers/Tags
+    });
+
+    // Estimate overhead for prompt structure
+    totalLength += 200;
+
+    return Math.ceil(totalLength / 3.3);
+  }, [state.mainInstruction, state.activeBlocks]);
 
   const {
     mentionState,
@@ -803,9 +821,7 @@ const App: React.FC = () => {
               ></textarea>
 
               {state.mainInstruction && (
-                <div className="token-counter">
-                  ~{Math.ceil(state.mainInstruction.length / 3.3)} tokens
-                </div>
+                <div className="token-counter">~{totalTokens} tokens</div>
               )}
 
               {mentionState.isActive && (
