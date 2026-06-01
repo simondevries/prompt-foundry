@@ -684,6 +684,11 @@ export class PromptManager {
     const block = this._activeBlocks.find(b => b.path === filePath);
     if (!block) return false;
     
+    // Cannot mark as goal if it does not have a reference section
+    if (!block.reference || block.referenceLocation === 'none') {
+      return false;
+    }
+    
     // Max 5 goals limit
     if (!block.isGoal) {
       const currentGoalCount = this._activeBlocks.filter(b => b.isGoal).length;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { PromptManager } from '../core/promptManager.js';
 import { StyleManager } from '../core/styleManager.js';
@@ -10,6 +9,57 @@ import { PromptBlock, PromptLibraryCategory, Group } from '../core/interfaces.js
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+
+interface SafeSelectInputProps<V> {
+  items: Array<{ key?: string; label: string; value: V; disabled?: boolean }>;
+  onSelect: (item: { key?: string; label: string; value: V; disabled?: boolean }) => void;
+  limit?: number;
+  isFocused?: boolean;
+}
+
+function SafeSelectInput<V>({ items, onSelect, limit = 15, isFocused = true }: SafeSelectInputProps<V>) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Keep selectedIndex in bounds when items change
+  useEffect(() => {
+    setSelectedIndex(prev => Math.max(0, Math.min(items.length - 1, prev)));
+  }, [items]);
+
+  useInput((input, key) => {
+    if (!isFocused) return;
+
+    if (key.upArrow || input === 'k') {
+      setSelectedIndex(prev => (prev > 0 ? prev - 1 : items.length - 1));
+    }
+    if (key.downArrow || input === 'j') {
+      setSelectedIndex(prev => (prev < items.length - 1 ? prev + 1 : 0));
+    }
+    if (key.return) {
+      const selectedItem = items[selectedIndex];
+      if (selectedItem && !selectedItem.disabled) {
+        onSelect(selectedItem);
+      }
+    }
+  }, { isActive: isFocused });
+
+  const visibleItems = items.slice(0, limit);
+
+  return (
+    <Box flexDirection="column">
+      {visibleItems.map((item, index) => {
+        const isSelected = index === selectedIndex;
+        return (
+          <Box key={item.key ?? String(index)}>
+            <Text color={isSelected ? 'cyan' : 'white'} bold={isSelected}>
+              {isSelected ? '▶ ' : '  '}
+              {item.label}
+            </Text>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
 
 interface AppProps {
   arg?: string;
@@ -226,6 +276,14 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
       if (block.category === 'AI-Contracts' || block.isSpecial) {
         return;
       }
+      
+      // Only allow starring if the block has a reference section
+      if (!block.reference || block.referenceLocation === 'none') {
+        setStatusMessage('Only blocks with a reference section can be goals.');
+        setTimeout(() => setStatusMessage(null), 2000);
+        return;
+      }
+      
       manager.toggleGoal(block.path);
       refreshActiveBlocks(manager);
     }
@@ -250,6 +308,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
       } else {
         process.stdout.write(compiled);
       }
+      manager.clearCurrentSession();
       setTimeout(() => exit(), 50);
     } catch (e) {
       // silenced
@@ -333,27 +392,20 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
   const filteredCategoryFiles = selectedCategory?.files.filter(f => !activePaths.has(path.join(selectedCategory.path, f))) || [];
 
   return (
-    <Box flexDirection="column" paddingX={2} paddingY={0} flexGrow={1}>
-      
-      {/* Top Instructions */}
-      <Box paddingBottom={0} justifyContent="center">
-        <Text color="cyan" dimColor>
-          Compile your prompt blocks here. Type your main instructional prompt in the AI input after closing.
-        </Text>
-      </Box>
+    <Box flexDirection="column" paddingX={1} paddingY={0} flexGrow={1}>
 
       {/* Main 2-Column Interface */}
       <Box flexGrow={1} flexDirection="row">
         
         {/* Left Column (50% Width) - Tabs Style */}
-        <Box width="50%" flexDirection="column" borderStyle="round" borderColor={focusSection === 'Library' || focusSection === 'Groups' ? 'green' : 'gray'} paddingX={2} paddingY={1}>
+        <Box width="50%" flexDirection="column" borderStyle="single" borderTop={false} borderBottom={false} borderLeft={false} borderRight={true} borderColor="gray" paddingX={1} paddingY={0}>
           
           {/* Tab Headers */}
-          <Box marginBottom={1}>
-             <Text color={focusSection === 'Library' ? 'green' : 'white'} bold={focusSection === 'Library'}>
-               {focusSection === 'Library' ? '● ' : '○ '}
-               [1] Prompt Library
-             </Text>
+          <Box marginBottom={0}>
+              <Text color={focusSection === 'Library' ? 'green' : 'white'} bold={focusSection === 'Library'}>
+                {focusSection === 'Library' ? '● ' : '○ '}
+                [1] Library
+              </Text>
              <Text>    </Text>
              <Text color={focusSection === 'Groups' ? 'green' : 'white'} bold={focusSection === 'Groups'}>
                {focusSection === 'Groups' ? '● ' : '○ '}
@@ -367,10 +419,11 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
                 <Box marginBottom={0}>
                   <Text bold color="gray">Browse Categories:</Text>
                 </Box>
-                <SelectInput 
+                <SafeSelectInput 
                   items={categories.map(c => ({ key: c.name, label: `📁 ${c.name}`, value: c.name }))} 
                   onSelect={handleSelectCategory}
                   limit={15}
+                  isFocused={focusSection === 'Library'}
                 />
               </Box>
             )}
@@ -382,7 +435,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
                 {filteredCategoryFiles.length === 0 ? (
                   <Text color="gray">All blocks from this category are already in the stack.</Text>
                 ) : (
-                  <SelectInput 
+                  <SafeSelectInput 
                     items={filteredCategoryFiles.map((f: string) => {
                       const disabled = isUnavailable(selectedCategory.name, f);
                       const fullPath = path.join(selectedCategory.path, f);
@@ -395,25 +448,27 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
                     })} 
                     onSelect={handleSelectBlock}
                     limit={15}
+                    isFocused={focusSection === 'Library'}
                   />
                 )}
-                <Box marginTop={1}>
+                <Box marginTop={0}>
                   <Text color="gray">[Esc] Return to categories</Text>
                 </Box>
               </Box>
             )}
             {leftView === 'VariableInput' && pendingBlock && (
-              <Box flexDirection="column" borderStyle="double" borderColor="magenta" padding={1}>
+              <Box flexDirection="column" borderStyle="double" borderColor="magenta" paddingX={1} paddingY={0}>
                 <Text bold color="magenta">📝 Variable Required: {pendingBlock.name}</Text>
                 <Box marginTop={0} flexDirection="column">
                   <Text color="yellow" bold>{pendingBlock.vars[currentVarIndex].name}{pendingBlock.vars[currentVarIndex].description ? ` - ${pendingBlock.vars[currentVarIndex].description}` : ''}:</Text>
                   
                   {pendingBlock.vars[currentVarIndex].type === 'select' ? (
                     <Box marginTop={0}>
-                      <SelectInput 
+                      <SafeSelectInput 
                         items={(pendingBlock.vars[currentVarIndex].options || []).map((opt: string) => ({ key: opt, label: opt, value: opt }))}
                         onSelect={(item) => handleVariableSubmit(item.value)}
                         limit={10}
+                        isFocused={leftView === 'VariableInput'}
                       />
                     </Box>
                   ) : (
@@ -426,7 +481,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
                     </Box>
                   )}
                 </Box>
-                <Box marginTop={1}>
+                <Box marginTop={0}>
                   <Text color="gray">({currentVarIndex + 1}/{pendingBlock.vars.length}) [Esc] Cancel</Text>
                 </Box>
               </Box>
@@ -440,9 +495,10 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
                 {searchQuery.length === 0 && <Text color="gray" italic>start typing to search...</Text>}
                 <Box>
                   {searchQuery.length > 0 && filteredBlocks.length === 0 ? <Text color="gray">No blocks match.</Text> : (
-                    <SelectInput 
+                    <SafeSelectInput 
                       items={filteredBlocks} 
                       onSelect={handleSelectBlock}
+                      isFocused={leftView === 'Search'}
                     />
                   )}
                 </Box>
@@ -454,10 +510,11 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
                   <Text bold color="gray">Available Groups:</Text>
                 </Box>
                 {groups.length === 0 ? <Text color="gray">No groups defined.</Text> : (
-                  <SelectInput 
+                  <SafeSelectInput 
                     items={groups.map(g => ({ key: g.name, label: `  ${g.name}`, value: g }))} 
                     onSelect={handleSelectGroup}
                     limit={15}
+                    isFocused={focusSection === 'Groups'}
                   />
                 )}
               </Box>
@@ -466,13 +523,23 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
         </Box>
 
         {/* Right Column (50% Width) - Active Prompt */}
-        <Box width="50%" flexDirection="column" borderStyle="round" borderColor={focusSection === 'ActiveStack' ? 'green' : 'gray'} paddingX={2} paddingY={1} marginLeft={2}>
+        <Box width="50%" flexDirection="column" paddingX={1} paddingY={0} marginLeft={1}>
           
           <Box marginBottom={0}>
             <Text color={focusSection === 'ActiveStack' ? 'green' : 'white'} bold={focusSection === 'ActiveStack'}>
               {focusSection === 'ActiveStack' ? '● ' : '○ '}
               [3] Active Prompt ({activeBlocks.length})
             </Text>
+          </Box>
+
+          {/* Main Instruction Section */}
+          <Box paddingX={0} paddingY={0} flexDirection="column" marginTop={0} marginBottom={1}>
+            <Text bold color="cyan">Main Instruction:</Text>
+            <Box paddingY={0}>
+              <Text color="white" wrap="wrap">
+                {initialMainInstruction ? truncateWords(initialMainInstruction, 50) : <Text color="gray" italic>None. Tip: You can type your main instructional prompt in the AI input after closing.</Text>}
+              </Text>
+            </Box>
           </Box>
 
           <Box flexGrow={1} flexDirection="column" marginY={0}>
@@ -491,21 +558,11 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
               ))
             )}
           </Box>
-
-          {/* Main Instruction Section */}
-          <Box borderStyle="single" borderColor="gray" paddingX={1} paddingY={0} flexDirection="column" marginTop={0}>
-            <Text bold color="cyan">Main Instruction:</Text>
-            <Box paddingY={0}>
-              <Text color="white" wrap="wrap">
-                {initialMainInstruction ? truncateWords(initialMainInstruction, 50) : <Text color="gray" italic>None (will be compiled from stack only)</Text>}
-              </Text>
-            </Box>
-          </Box>
         </Box>
       </Box>
 
       {/* Footer Instructions / Keyboard Shortcuts */}
-      <Box marginTop={0} paddingX={2} borderStyle="classic" borderColor="gray">
+      <Box marginTop={0} paddingX={1}>
         <Box flexGrow={1}>
           {statusMessage ? (
             <Text color="green" bold>{statusMessage}</Text>
