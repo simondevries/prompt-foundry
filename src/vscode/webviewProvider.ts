@@ -15,6 +15,7 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly _promptManager: PromptManager,
+    private readonly _globalStorageUri?: vscode.Uri,
   ) {
     this._fs = _promptManager.fs;
   }
@@ -286,7 +287,10 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           } catch (e) {
             console.error("Failed to auto-save session after appendPrompt", e);
           }
-          vscode.commands.executeCommand("prompt-forge.appendToActiveEditor", appendText);
+          vscode.commands.executeCommand(
+            "prompt-forge.appendToActiveEditor",
+            appendText,
+          );
           break;
         case "copyPrompt":
           const copyText = await this._compileCurrentPrompt();
@@ -589,7 +593,9 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               this._promptManager.addGroupToActiveBlocks(group);
               this.refresh();
             } else {
-              vscode.window.showErrorMessage(`Group "${data.agent}" not found.`);
+              vscode.window.showErrorMessage(
+                `Group "${data.agent}" not found.`,
+              );
             }
           }
           break;
@@ -648,11 +654,11 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           break;
         case "getMcpConfig":
           if (this.view) {
-            const mcpPath = path.join(
-              this._extensionUri.fsPath,
-              "dist",
-              "mcp.bundle.js",
-            );
+            // Use the deployed path from globalStorageUri if it exists, otherwise fallback to extensionPath
+            const mcpPath = this._globalStorageUri
+              ? path.join(this._globalStorageUri.fsPath, "mcp", "mcp.bundle.js")
+              : "Not found";
+
             const promptRoot = this._promptManager.getPromptBuilderDir();
             const config = {
               mcpServers: {
@@ -727,7 +733,9 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               const startLine = selection.start.line + 1;
               const endLine = selection.end.line + 1;
               lines =
-                startLine === endLine ? `${startLine}` : `${startLine}-${endLine}`;
+                startLine === endLine
+                  ? `${startLine}`
+                  : `${startLine}-${endLine}`;
             }
             this.view?.webview.postMessage({
               type: "insertFileTag",
@@ -735,7 +743,9 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               lines: lines,
             });
           } else {
-            vscode.window.showInformationMessage("No active editor found to add.");
+            vscode.window.showInformationMessage(
+              "No active editor found to add.",
+            );
           }
           break;
         case "commitProposedEdit":
@@ -818,7 +828,10 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
     ];
 
     for (const action of actions) {
-      if (action.name.startsWith(lowerFilter) || action.label.toLowerCase().includes(lowerFilter)) {
+      if (
+        action.name.startsWith(lowerFilter) ||
+        action.label.toLowerCase().includes(lowerFilter)
+      ) {
         results.push({
           type: "action",
           name: action.name,
@@ -829,7 +842,10 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
     }
 
     // 2. Search Blocks
-    const library = this._promptManager.getPromptLibrary(true, true) as PromptLibraryCategory[];
+    const library = this._promptManager.getPromptLibrary(
+      true,
+      true,
+    ) as PromptLibraryCategory[];
     const searchContent = lowerFilter.replace(/^(block|group)\s*/, "");
 
     for (const category of library) {
@@ -850,7 +866,10 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
     // 3. Search Groups
     const groups = this._promptManager.getGroupLibrary();
     for (const group of groups) {
-      if (lowerFilter === "" || group.name.toLowerCase().includes(searchContent)) {
+      if (
+        lowerFilter === "" ||
+        group.name.toLowerCase().includes(searchContent)
+      ) {
         results.push({
           type: "block",
           name: group.name,
@@ -1222,7 +1241,10 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
         false,
       );
       const showCursorRules = config.get<boolean>("showCursorRules", false);
-      const showWorkspaceSkills = config.get<boolean>("showWorkspaceSkills", false);
+      const showWorkspaceSkills = config.get<boolean>(
+        "showWorkspaceSkills",
+        false,
+      );
       this.view.webview.postMessage({
         type: "updatePromptBlocksSettings",
         settings: {

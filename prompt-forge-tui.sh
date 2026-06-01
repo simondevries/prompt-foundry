@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Prompt Foundry TUI v0.2.12
 set -euo pipefail
 
 # Resolve the project dir relative to this script, regardless of where it's called from
@@ -44,14 +45,35 @@ open_terminal() {
     esac
 }
 
+# Resolve the execution command: 
+# 1. Check if a bundled version exists in the same directory (deployed mode)
+# 2. Otherwise check dist/ (local build mode)
+if [[ -f "$PROJECT_DIR/tui.bundle.mjs" ]]; then
+    BUNDLE_PATH="$PROJECT_DIR/tui.bundle.mjs"
+elif [[ -f "$PROJECT_DIR/dist/tui.bundle.mjs" ]]; then
+    BUNDLE_PATH="$PROJECT_DIR/dist/tui.bundle.mjs"
+elif [[ -f "$PROJECT_DIR/tui.bundle.js" ]]; then
+    BUNDLE_PATH="$PROJECT_DIR/tui.bundle.js"
+elif [[ -f "$PROJECT_DIR/dist/tui.bundle.js" ]]; then
+    BUNDLE_PATH="$PROJECT_DIR/dist/tui.bundle.js"
+else
+    die "tui.bundle.mjs (or .js) not found. Please run 'pnpm run package' first."
+fi
+
 # ─── --new-window mode (called by Claude Code / editor integration) ────────────
 
 if [[ "${1:-}" == "--new-window" ]]; then
     shift
     ORIGINAL_FILE="${1:-}"
 
-    # Temp dir scoped to TMPDIR (cross-platform), cleaned up automatically on EXIT
-    TEMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/prompt-forge.XXXXXX")"
+    # Use a local tmp directory strictly
+    TUI_TMP_BASE="$PROJECT_DIR/tmp"
+    if [[ ! -d "$TUI_TMP_BASE" ]]; then
+        mkdir -p "$TUI_TMP_BASE"
+    fi
+
+    # Create temp dir inside local tmp strictly
+    TEMP_DIR=$(mktemp -d "$TUI_TMP_BASE/prompt-forge.XXXXXX")
     TEMP_FILE="$TEMP_DIR/result"
     TEMP_FILE_ATOMIC="$TEMP_DIR/result.tmp"  # TUI writes here first, then mv → atomic
     LAUNCHER_SCRIPT="$TEMP_DIR/launcher.sh"
@@ -64,7 +86,7 @@ if [[ "${1:-}" == "--new-window" ]]; then
 #!/usr/bin/env bash
 cd "${PROJECT_DIR}"
 clear
-node --import tsx src/tui/index.tsx "${ORIGINAL_FILE}" "${TEMP_FILE_ATOMIC}"
+node "${BUNDLE_PATH}" "\${ORIGINAL_FILE}" "\${TEMP_FILE_ATOMIC}"
 # Atomic rename so the parent never reads a partial file
 if [[ -s "${TEMP_FILE_ATOMIC}" ]]; then
     mv "${TEMP_FILE_ATOMIC}" "${TEMP_FILE}"
@@ -100,4 +122,4 @@ LAUNCHER
 fi
 
 # ─── Direct / same-window fallback ────────────────────────────────────────────
-(cd "$PROJECT_DIR" && node --import tsx src/tui/index.tsx "$@") < /dev/tty
+(cd "$PROJECT_DIR" && node "$BUNDLE_PATH" "$@") < /dev/tty
