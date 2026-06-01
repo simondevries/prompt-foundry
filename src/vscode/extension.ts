@@ -14,11 +14,15 @@ import {
   setupFileWatcher,
   setupEditorListeners,
 } from "./commands";
+import { deployBinaries } from "./deploy";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+
+  // Deploy binaries to global storage
+  const storageUri = await deployBinaries(context);
 
   // Fallback to extension-bundled prompts if no custom folder configured
   const config = vscode.workspace.getConfiguration("promptForge");
@@ -96,6 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
   const webviewProvider = new MainPromptWebviewProvider(
     context.extensionUri,
     promptManager,
+    context.globalStorageUri,
   );
 
   // Register commands

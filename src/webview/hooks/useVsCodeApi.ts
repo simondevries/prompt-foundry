@@ -136,7 +136,11 @@ export function useVsCodeApi() {
           setState((prev) => ({ ...prev, history: message.history || [] }));
           break;
         case "updateMcpConfig":
-          setState((prev) => ({ ...prev, mcpConfig: message.config || "" }));
+          setState((prev) => ({
+            ...prev,
+            mcpConfig: message.config || "",
+            tuiPath: message.tuiPath,
+          }));
           break;
         case "setMainInstruction":
           setState((prev) => ({
