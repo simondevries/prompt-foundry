@@ -82,6 +82,7 @@ export interface State {
   milestones: Record<string, boolean>;
   activeTooltipId: string | null;
   mcpConfig: string;
+  tuiPath?: string;
   suggestions: Block[];
   proposedEdits: ProposedEdit[];
 }

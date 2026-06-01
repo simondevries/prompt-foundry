@@ -86,7 +86,7 @@ if [[ "${1:-}" == "--new-window" ]]; then
 #!/usr/bin/env bash
 cd "${PROJECT_DIR}"
 clear
-node "${BUNDLE_PATH}" "\${ORIGINAL_FILE}" "\${TEMP_FILE_ATOMIC}"
+node "${BUNDLE_PATH}" "${ORIGINAL_FILE}" "${TEMP_FILE_ATOMIC}"
 # Atomic rename so the parent never reads a partial file
 if [[ -s "${TEMP_FILE_ATOMIC}" ]]; then
     mv "${TEMP_FILE_ATOMIC}" "${TEMP_FILE}"

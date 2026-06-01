@@ -659,6 +659,14 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               ? path.join(this._globalStorageUri.fsPath, "mcp", "mcp.bundle.js")
               : "Not found";
 
+            const tuiPath = this._globalStorageUri
+              ? path.join(
+                  this._globalStorageUri.fsPath,
+                  "tui",
+                  "prompt-forge-tui.sh",
+                )
+              : "Not found";
+
             const promptRoot = this._promptManager.getPromptBuilderDir();
             const config = {
               mcpServers: {
@@ -674,6 +682,7 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
             this.view.webview.postMessage({
               type: "updateMcpConfig",
               config: JSON.stringify(config, null, 2),
+              tuiPath: tuiPath,
             });
           }
           break;

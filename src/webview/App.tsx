@@ -27,6 +27,57 @@ const REFERENCE_LOCATIONS = [
   { value: "none", label: "Goal Only", description: "Does not appear in the workflow; only appears in the '# Key goals' section at the bottom." },
 ];
 
+const CopyablePre: React.FC<{ content: string }> = ({ content }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <pre
+        style={{
+          backgroundColor: "var(--vscode-editor-background)",
+          padding: "8px",
+          paddingRight: "36px",
+          overflowX: "auto",
+          fontSize: "0.8em",
+          border: "1px solid var(--vscode-widget-border)",
+        }}
+      >
+        <code>{content}</code>
+      </pre>
+      <button
+        onClick={handleCopy}
+        style={{
+          position: "absolute",
+          top: "4px",
+          right: "4px",
+          background: "var(--vscode-button-secondaryBackground, transparent)",
+          border: "none",
+          color: "var(--vscode-button-secondaryForeground, inherit)",
+          cursor: "pointer",
+          opacity: 0.8,
+          padding: "4px",
+          borderRadius: "3px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+        title="Copy to clipboard"
+      >
+        <span
+          className={`codicon codicon-${copied ? "check" : "copy"}`}
+          style={{ fontSize: "12px" }}
+        ></span>
+      </button>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const { state, postMessage, updateState, initialized } = useVsCodeApi();
 
@@ -1814,6 +1865,52 @@ const App: React.FC = () => {
                 >
                   Configure Workspace Settings
                 </button>
+              </div>
+            ),
+          },
+          {
+            id: "tui",
+            title: "TUI Dashboard",
+            icon: "terminal",
+            content: (
+              <div>
+                <p>
+                  The Prompt Foundry TUI is a standalone dashboard that lets you
+                  access your prompt library from external AI CLI tools like
+                  Claude Code or Aider.
+                </p>
+
+                <h4 style={{ margin: "12px 0 6px" }}>Setup for Claude Code</h4>
+                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
+                  To use Prompt Foundry as your primary prompt editor in Claude
+                  Code, update your ~/.claude/settings.json:
+                </p>
+                <CopyablePre
+                  content={`{
+  "useExternalEditor": true,
+  "externalEditor": "${state.tuiPath || "/path/to/prompt-forge-tui.sh"} --new-window"
+}`}
+                />
+
+                <h4 style={{ margin: "16px 0 6px" }}>General Terminal Usage</h4>
+                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
+                  Set the EDITOR environment variable in your shell
+                  profile (.zshrc or .bashrc):
+                </p>
+                <CopyablePre
+                  content={`export EDITOR="${state.tuiPath || "/path/to/prompt-forge-tui.sh"} --new-window"`}
+                />
+
+                <div
+                  className="banner banner-attention"
+                  style={{ marginTop: "12px", fontSize: "0.85em" }}
+                >
+                  Note: Setting EDITOR globally
+                  will cause all terminal tools (like git commit) to
+                  launch the Prompt Foundry dashboard. If you prefer to keep
+                  your default editor for other tasks, use the Claude-specific
+                  setting above.
+                </div>
               </div>
             ),
           },
