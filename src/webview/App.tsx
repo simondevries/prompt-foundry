@@ -1808,7 +1808,7 @@ const App: React.FC = () => {
                 <p>
                   The Prompt Foundry TUI is a standalone dashboard that lets you
                   access your prompt library from external AI CLI tools like
-                  Claude Code or Aider.
+                  Claude Code.
                 </p>
 
                 <h4 style={{ margin: "12px 0 6px" }}>Setup for Claude Code</h4>
@@ -1819,7 +1819,7 @@ const App: React.FC = () => {
                 <CopyablePre
                   content={`{
   "useExternalEditor": true,
-  "externalEditor": "${state.tuiPath || "/path/to/prompt-forge-tui.sh"} --new-window"
+  "externalEditor": "${state.tuiPath ? `\\"${state.tuiPath}\\"` : "/path/to/prompt-forge-tui.sh"} --new-window${state.settings.promptFolder ? ` --library \\"${state.settings.promptFolder}\\"` : ""}"
 }`}
                 />
 
@@ -1829,7 +1829,15 @@ const App: React.FC = () => {
                   profile (.zshrc or .bashrc):
                 </p>
                 <CopyablePre
-                  content={`export EDITOR="${state.tuiPath || "/path/to/prompt-forge-tui.sh"} --new-window"`}
+                  content={`export EDITOR="${state.tuiPath ? `\\"${state.tuiPath}\\"` : "/path/to/prompt-forge-tui.sh"} --new-window${state.settings.promptFolder ? ` --library \\"${state.settings.promptFolder}\\"` : ""}"`}
+                />
+
+                <h4 style={{ margin: "16px 0 6px" }}>Run directly</h4>
+                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
+                  Open the dashboard directly in your current terminal:
+                </p>
+                <CopyablePre
+                  content={`${state.tuiPath ? `"${state.tuiPath}"` : "/path/to/prompt-forge-tui.sh"}${state.settings.promptFolder ? ` --library "${state.settings.promptFolder}"` : ""}`}
                 />
 
                 <div

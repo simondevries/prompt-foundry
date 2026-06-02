@@ -64,6 +64,7 @@ function SafeSelectInput<V>({ items, onSelect, limit = 15, isFocused = true }: S
 interface AppProps {
   arg?: string;
   outputArg?: string;
+  libraryPath?: string;
 }
 
 type FocusSection = 'Library' | 'Groups' | 'ActiveStack';
@@ -76,7 +77,7 @@ interface VariableDefinition {
   description?: string;
 }
 
-export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
+export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
   const { exit } = useApp();
   const [manager, setManager] = useState<PromptManager | null>(null);
   
@@ -110,7 +111,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
 
   // 1. Initialize core managers
   useEffect(() => {
-    let promptBuilderDir = DEFAULT_PROMPT_BUILDER_DIR;
+    let promptBuilderDir = libraryPath || DEFAULT_PROMPT_BUILDER_DIR;
     let mainInstrFromFile = '';
     let savePath: string | null = outputArg || null;
 
@@ -120,7 +121,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg }) => {
         if (stats.isFile()) {
           mainInstrFromFile = fs.readFileSync(arg, 'utf8').trim();
           if (!savePath) savePath = arg;
-        } else if (stats.isDirectory()) {
+        } else if (stats.isDirectory() && !libraryPath) {
           promptBuilderDir = arg;
         }
       }

@@ -13,7 +13,19 @@ console.error = (msg) => {
   process.stderr.write(msg + '\n');
 };
 
-const arg = process.argv[2];
-const outputArg = process.argv[3];
+let arg: string | undefined = undefined;
+let outputArg: string | undefined = undefined;
+let libraryPath: string | undefined = undefined;
 
-render(<App arg={arg} outputArg={outputArg} />);
+for (let i = 2; i < process.argv.length; i++) {
+  const a = process.argv[i];
+  if (a === '--library' || a === '-l') {
+    libraryPath = process.argv[++i];
+  } else if (!arg) {
+    arg = a;
+  } else if (!outputArg) {
+    outputArg = a;
+  }
+}
+
+render(<App arg={arg} outputArg={outputArg} libraryPath={libraryPath} />);

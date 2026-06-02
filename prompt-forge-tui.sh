@@ -60,12 +60,37 @@ else
     die "tui.bundle.mjs (or .js) not found. Please run 'pnpm run package' first."
 fi
 
+# ─── Argument Parsing ─────────────────────────────────────────────────────────
+
+NEW_WINDOW=false
+LIBRARY_PATH=""
+ORIGINAL_FILE=""
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --new-window)
+            NEW_WINDOW=true
+            shift
+            ;;
+        --library|-l)
+            LIBRARY_PATH="$2"
+            shift 2
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [[ -n "${POSITIONAL_ARGS[0]:-}" ]]; then
+    ORIGINAL_FILE="${POSITIONAL_ARGS[0]}"
+fi
+
 # ─── --new-window mode (called by Claude Code / editor integration) ────────────
 
-if [[ "${1:-}" == "--new-window" ]]; then
-    shift
-    ORIGINAL_FILE="${1:-}"
-
+if [[ "$NEW_WINDOW" == true ]]; then
     # Use a local tmp directory strictly
     TUI_TMP_BASE="$PROJECT_DIR/tmp"
     if [[ ! -d "$TUI_TMP_BASE" ]]; then
@@ -82,11 +107,16 @@ if [[ "${1:-}" == "--new-window" ]]; then
     # Always clean up temp dir on script exit (normal, error, or signal)
     trap 'rm -rf "$TEMP_DIR"' EXIT
 
+    LIB_ARG=""
+    if [[ -n "$LIBRARY_PATH" ]]; then
+        LIB_ARG="--library $LIBRARY_PATH"
+    fi
+
     cat > "$LAUNCHER_SCRIPT" << LAUNCHER
 #!/usr/bin/env bash
 cd "${PROJECT_DIR}"
 clear
-node "${BUNDLE_PATH}" "${ORIGINAL_FILE}" "${TEMP_FILE_ATOMIC}"
+node "${BUNDLE_PATH}" "${ORIGINAL_FILE}" "${TEMP_FILE_ATOMIC}" ${LIB_ARG}
 # Atomic rename so the parent never reads a partial file
 if [[ -s "${TEMP_FILE_ATOMIC}" ]]; then
     mv "${TEMP_FILE_ATOMIC}" "${TEMP_FILE}"
@@ -122,4 +152,9 @@ LAUNCHER
 fi
 
 # ─── Direct / same-window fallback ────────────────────────────────────────────
-(cd "$PROJECT_DIR" && node "$BUNDLE_PATH" "$@") < /dev/tty
+LIB_ARG_ARRAY=()
+if [[ -n "$LIBRARY_PATH" ]]; then
+    LIB_ARG_ARRAY=("--library" "$LIBRARY_PATH")
+fi
+
+(cd "$PROJECT_DIR" && node "$BUNDLE_PATH" "${POSITIONAL_ARGS[@]}" "${LIB_ARG_ARRAY[@]}") < /dev/tty
