@@ -1,5 +1,5 @@
 <!--
-# version: 1.0
+# version: 1.1
 # ReferenceLocation: none
 -->
 
@@ -16,7 +16,7 @@ vars:
   tangent_preference:
     type: select
     options: ["Laser-Focused: Stay strictly on track. Make no unnecessary or unrelated changes", "Exploratory: Willing to allow deviation if it greatly benefits the feature (eg. new ideas or adjustments) or code quality (eg. refactoring)"]
-  explanation_density:
+  code_comment_verbosity:
     type: select
     options: ["None: Code only", "Critical comments only: Only when explaining complex or unintuitive logic", "Header-Only: Brief docblocks (eg. JSDoc above method)", "Detailed comments: Comprehensive comments explaining the purpose and logic of each section of code"]
   conversational_verbosity:
@@ -31,6 +31,6 @@ vars:
 
 - Your role is: {{ role }}
 - Task Tangent Preference: {{ tangent_preference }}
-- Code Comment Strategy: {{ explanation_density }}
+- Code Comment Strategy: {{ code_comment_verbosity }}
 - Conversational Verbosity: {{ conversational_verbosity }}
 - Output format preference: {{ output_format }}

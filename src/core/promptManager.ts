@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { SecureFileSystem } from "./fs";
+import { SecureFileSystem, FsPermission } from "./fs";
 import {
   getCurrentInstructionPromptFile,
   getStylesFile,
@@ -33,10 +33,29 @@ export class PromptManager {
   public getWorkspaceSkillsDir(): string | undefined {
     return this._workspaceSkillsDir;
   }
+
+  public setCustomFolders(folders: string[]) {
+    this._customFolders = folders;
+    for (const folder of folders) {
+      this._fs.trustPath(folder, FsPermission.Read);
+    }
+    this.reload();
+  }
+
+  public setCustomWorkspaceFolders(folders: { name: string; path: string }[]) {
+    this._customWorkspaceFolders = folders;
+    for (const folder of folders) {
+      this._fs.trustPath(folder.path, FsPermission.Read);
+    }
+    this.reload();
+  }
+
   private _mainInstruction: string = "";
   private _mainFileMap: Record<string, string> = {};
   private _mainCollidedNames: Record<string, boolean> = {};
   private _activeBlocks: PromptBlock[] = [];
+  private _customFolders: string[] = [];
+  private _customWorkspaceFolders: { name: string; path: string }[] = [];
   private _associationManager: AssociationManager;
   private _libraryManager: LibraryManager;
   private _compiler: PromptCompiler;
@@ -136,7 +155,16 @@ export class PromptManager {
   }
 
   public canModifyCategory(category?: string): boolean {
-    if (category && BUNDLED_CATEGORIES.includes(category)) {
+    if (!category) return false;
+    if (BUNDLED_CATEGORIES.includes(category)) {
+      return false;
+    }
+    if (category === "Skills (workspace)" || category === "Special" || category === "Tools") {
+      return false;
+    }
+
+    const categoryPath = this._libraryManager.getCategoryPath(category);
+    if (!this._isInside(this._promptBuilderDir, categoryPath)) {
       return false;
     }
 
@@ -226,6 +254,15 @@ export class PromptManager {
   public setPromptBuilderDir(dir: string) {
     this._promptBuilderDir = dir;
     this._fs.updateRoots(dir);
+    
+    // Re-trust custom folders after updating roots
+    for (const folder of this._customFolders) {
+      this._fs.trustPath(folder, FsPermission.Read);
+    }
+    for (const folder of this._customWorkspaceFolders) {
+      this._fs.trustPath(folder.path, FsPermission.Read);
+    }
+
     this._associationManager.setPromptBuilderDir(dir);
     this._libraryManager.setPromptBuilderDir(dir);
     this._sessionManager.setPromptBuilderDir(dir);
@@ -567,11 +604,15 @@ export class PromptManager {
   public getPromptLibrary(
     showClaudeCodePromptBlocks: boolean = false,
     showCursorRules: boolean = false,
+    customFolders: string[] = [],
+    customWorkspaceFolders: { name: string; path: string }[] = [],
   ): PromptLibraryCategory[] {
     return this._libraryManager.getPromptLibrary(
       showClaudeCodePromptBlocks,
       showCursorRules,
       this._workspaceSkillsDir,
+      customFolders,
+      customWorkspaceFolders,
     );
   }
 

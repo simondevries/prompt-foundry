@@ -114,7 +114,7 @@ The live focus (⚡) button lets you select files and lines in the IDE and adds 
 
 ### Prompt blocks
 
-A prompt block is a markdown file with a chunk of reusable instructions or information. Here is a simple example:
+A prompt block is a markdown file containing reusable instructions or information. You have your own prompt library but can also attach a custom directory or workspace directory. Here is a simple example:
 
 ```markdown
 # Code style
@@ -148,7 +148,7 @@ A block can include a short reference - a reminder compiled into a specific posi
 
 #### Goals
 
-Star a block to mark it as a goal. Its reference text gets pulled into a dedicated `# Key goals for while completing this task:` section at the end of the prompt, giving the AI a clear summary of what matters most before it starts work.
+Star a block to mark it as a goal. Its reference text gets pulled into a dedicated `# Key goals while completing this task:` section at the end of the prompt, giving the AI a clear summary of what matters most before it starts work.
 
 #### Templating
 
@@ -184,7 +184,7 @@ Text Example: {{textExample}}
 
 ### Prompt block groups
 
-Once you've added a few blocks, save them as a group. Useful for repeating the same setup across similar tasks.
+When you frequenetly need to add the same prompt blocks, use the group feature. To create a group add some blocks to the prompt and then press the '+' button next to group. The active prompts will be added to the group. 
 
 ## Demo
 

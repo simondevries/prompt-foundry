@@ -82,7 +82,15 @@
         "promptForge.showWorkspaceSkills": {
           "type": "boolean",
           "default": false,
-          "description": "Show skills from your workspace as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .skills/ or skills/ directories."
+          "description": "Show skills from your workspace as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .skills/ or skills/ directories in your workspace."
+        },
+        "promptForge.customFolders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of absolute folder paths to include in the prompt library as read-only categories."
         },
         "promptForge.historyRetentionLimit": {
           "type": "number",

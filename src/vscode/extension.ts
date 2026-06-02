@@ -97,6 +97,25 @@ export async function activate(context: vscode.ExtensionContext) {
     promptManager.setWorkspaceSkillsDir(workspaceRoot);
   }
 
+  // Initialize custom folders
+  const customFoldersRaw = config.get<string[]>("customFolders", []);
+  const customFolders = customFoldersRaw.map((p) => {
+    if (p.startsWith("~")) {
+      return path.join(os.homedir(), p.slice(2));
+    }
+    return p;
+  });
+  promptManager.setCustomFolders(customFolders);
+
+  const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
+  if (workspaceRoot) {
+    const resolvedWorkspaceFolders = customWorkspaceFoldersRaw.map((p) => ({
+      name: path.basename(p),
+      path: path.join(workspaceRoot, p),
+    }));
+    promptManager.setCustomWorkspaceFolders(resolvedWorkspaceFolders);
+  }
+
   const webviewProvider = new MainPromptWebviewProvider(
     context.extensionUri,
     promptManager,
@@ -175,6 +194,30 @@ export async function activate(context: vscode.ExtensionContext) {
           trustWorkspaceSkills(false);
           promptManager.setWorkspaceSkillsDir(undefined);
         }
+        webviewProvider.refresh();
+      }
+
+      if (e.affectsConfiguration("promptForge.customFolders") || e.affectsConfiguration("promptForge.customWorkspaceFolders")) {
+        const config = vscode.workspace.getConfiguration("promptForge");
+        
+        const customFoldersRaw = config.get<string[]>("customFolders", []);
+        const customFolders = customFoldersRaw.map((p) => {
+          if (p.startsWith("~")) {
+            return path.join(os.homedir(), p.slice(2));
+          }
+          return p;
+        });
+        promptManager.setCustomFolders(customFolders);
+
+        const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
+        if (workspaceRoot) {
+          const resolvedWorkspaceFolders = customWorkspaceFoldersRaw.map((p) => ({
+            name: path.basename(p),
+            path: path.join(workspaceRoot, p),
+          }));
+          promptManager.setCustomWorkspaceFolders(resolvedWorkspaceFolders);
+        }
+
         webviewProvider.refresh();
       }
 

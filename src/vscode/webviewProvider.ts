@@ -851,9 +851,18 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
     }
 
     // 2. Search Blocks
+    const {
+      showClaudeCodeBlocks,
+      showCursorRules,
+      customFolders,
+      customWorkspaceFolders,
+    } = this._getPromptLibrarySettings();
+
     const library = this._promptManager.getPromptLibrary(
-      true,
-      true,
+      showClaudeCodeBlocks,
+      showCursorRules,
+      customFolders,
+      customWorkspaceFolders,
     ) as PromptLibraryCategory[];
     const searchContent = lowerFilter.replace(/^(block|group)\s*/, "");
 
@@ -1101,17 +1110,18 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
       console.log("Refreshing webview...");
       this._promptManager.reload();
 
-      const config = vscode.workspace.getConfiguration("promptForge");
-      const showClaudeCodeBlocks = config.get<boolean>(
-        "showClaudeCodeBlocks",
-        false,
-      );
-
-      const showCursorRules = config.get<boolean>("showCursorRules", false);
+      const {
+        showClaudeCodeBlocks,
+        showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
+      } = this._getPromptLibrarySettings();
 
       const library = this._promptManager.getPromptLibrary(
         showClaudeCodeBlocks,
         showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
       );
       const activeBlocks = this._promptManager.getActiveBlocks();
       const mainInstruction = this._promptManager.getMainInstruction();
@@ -1137,15 +1147,18 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
 
   private sendBlocksUpdate() {
     if (this.view) {
-      const config = vscode.workspace.getConfiguration("promptForge");
-      const showClaudeCodeBlocks = config.get<boolean>(
-        "showClaudeCodeBlocks",
-        false,
-      );
-      const showCursorRules = config.get<boolean>("showCursorRules", false);
+      const {
+        showClaudeCodeBlocks,
+        showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
+      } = this._getPromptLibrarySettings();
+
       const library = this._promptManager.getPromptLibrary(
         showClaudeCodeBlocks,
         showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
       );
       const activeBlocks = this._promptManager.getActiveBlocks();
       const groupLibrary = this._promptManager.getGroupLibrary();
@@ -1172,16 +1185,18 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
   public sendInitialData() {
     if (this.view) {
       console.log("Sending initial data package to webview...");
-      const config = vscode.workspace.getConfiguration("promptForge");
-      const showClaudeCodeBlocks = config.get<boolean>(
-        "showClaudeCodeBlocks",
-        false,
-      );
-      const showCursorRules = config.get<boolean>("showCursorRules", false);
+      const {
+        showClaudeCodeBlocks,
+        showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
+      } = this._getPromptLibrarySettings();
 
       const library = this._promptManager.getPromptLibrary(
         showClaudeCodeBlocks,
         showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
       );
       const activeBlocks = this._promptManager.getActiveBlocks();
       const mainInstruction = this._promptManager.getMainInstruction();
@@ -1244,12 +1259,14 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
 
   private sendPromptBlocksSettings() {
     if (this.view) {
+      const {
+        showClaudeCodeBlocks,
+        showCursorRules,
+        customFolders,
+        customWorkspaceFolders,
+      } = this._getPromptLibrarySettings();
+
       const config = vscode.workspace.getConfiguration("promptForge");
-      const showClaudeCodeBlocks = config.get<boolean>(
-        "showClaudeCodeBlocks",
-        false,
-      );
-      const showCursorRules = config.get<boolean>("showCursorRules", false);
       const showWorkspaceSkills = config.get<boolean>(
         "showWorkspaceSkills",
         false,
@@ -1261,6 +1278,8 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
           showClaudeCodeBlocks,
           showCursorRules,
           showWorkspaceSkills,
+          customFolders,
+          customWorkspaceFolders,
         },
       });
     }
@@ -1688,6 +1707,47 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
       },
     );
   }
+  private _getPromptLibrarySettings() {
+    const config = vscode.workspace.getConfiguration("promptForge");
+    const showClaudeCodeBlocks = config.get<boolean>(
+      "showClaudeCodeBlocks",
+      false,
+    );
+    const showCursorRules = config.get<boolean>("showCursorRules", false);
+    const customFoldersRaw = config.get<string[]>("customFolders", []);
+    const customFolders = customFoldersRaw.map((p) => {
+      if (p.startsWith("~")) {
+        return path.join(os.homedir(), p.slice(2));
+      }
+      return p;
+    });
+
+    const customWorkspaceFoldersRaw = config.get<string[]>(
+      "customWorkspaceFolders",
+      [],
+    );
+
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    const resolvedWorkspaceFolders: { name: string; path: string }[] = [];
+
+    if (workspaceFolders && workspaceFolders.length > 0) {
+      const rootPath = workspaceFolders[0].uri.fsPath;
+      for (const relPath of customWorkspaceFoldersRaw) {
+        resolvedWorkspaceFolders.push({
+          name: path.basename(relPath),
+          path: path.join(rootPath, relPath),
+        });
+      }
+    }
+
+    return {
+      showClaudeCodeBlocks,
+      showCursorRules,
+      customFolders,
+      customWorkspaceFolders: resolvedWorkspaceFolders,
+    };
+  }
+
   private _getNonce() {
     let text = "";
     const possible =

@@ -92,17 +92,19 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
                   </span>
                 </div>
                 <div className="actions">
-                  <IconButton
-                    icon="edit"
-                    title="Edit Block"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditBlock(res.path);
-                    }}
-                  />
-                  {!["Claude Skills", "Claude Commands", "Cursor"].includes(
-                    res.category,
-                  ) && (
+                  {library.find((c) => c.name === res.category)?.type ===
+                    "user" && (
+                    <IconButton
+                      icon="edit"
+                      title="Edit Block"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditBlock(res.path);
+                      }}
+                    />
+                  )}
+                  {library.find((c) => c.name === res.category)?.type ===
+                    "user" && (
                     <IconButton
                       icon="folder"
                       title="Move to Folder"
@@ -112,9 +114,8 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
                       }}
                     />
                   )}
-                  {!["Claude Skills", "Claude Commands", "Cursor"].includes(
-                    res.category,
-                  ) && (
+                  {library.find((c) => c.name === res.category)?.type ===
+                    "user" && (
                     <IconButton
                       icon="trash"
                       title="Delete Block"
@@ -197,17 +198,17 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
                 >
                   <span>{file.includes('/') ? `[${file.split('/')[0]}] ${file.split('/').pop()}` : file}</span>
                   <div className="actions">
-                    <IconButton
-                      icon="edit"
-                      title="Edit Block"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditBlock(blockPath);
-                      }}
-                    />
-                    {!["Claude Skills", "Claude Commands", "Cursor"].includes(
-                      selectedCategoryName!,
-                    ) && (
+                    {category?.type === "user" && (
+                      <IconButton
+                        icon="edit"
+                        title="Edit Block"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditBlock(blockPath);
+                        }}
+                      />
+                    )}
+                    {category?.type === "user" && (
                       <IconButton
                         icon="folder"
                         title="Move to Folder"
@@ -217,9 +218,7 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
                         }}
                       />
                     )}
-                    {!["Claude Skills", "Claude Commands", "Cursor"].includes(
-                      selectedCategoryName!,
-                    ) && (
+                    {category?.type === "user" && (
                       <IconButton
                         icon="trash"
                         title="Delete Block"
@@ -235,10 +234,7 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
               );
             })}
 
-          {![
-            "Special",
-            "Tools",
-          ].includes(selectedCategoryName) && (
+          {category?.type === "user" && (
             <li
               className="list-item create-block-btn"
               style={{

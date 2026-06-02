@@ -1294,83 +1294,8 @@ const App: React.FC = () => {
               <div
                 style={{ display: "flex", alignItems: "center", gap: "8px" }}
               >
-                <span className="codicon codicon-settings"></span>
-                <span>Change Prompt Folder...</span>
-              </div>
-            </div>
-
-            <div
-              className="history-item"
-              onClick={() => {
-                setSettingsOpen(false);
-                postMessage({ type: "getMcpConfig" });
-                setPermissionsModal({ open: true, defaultExpanded: "mcp" });
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <span className="codicon codicon-circuit-board"></span>
-                <span>Setup MCP Server...</span>
-              </div>
-            </div>
-
-            <div
-              className="history-item"
-              onClick={() => {
-                postMessage({
-                  type: "openSettings",
-                  setting: "promptForge.showClaudeCodeBlocks",
-                });
-                setSettingsOpen(false);
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <span
-                  className={`codicon codicon-${state.settings.showClaudeCodeBlocks ? "check" : "blank"}`}
-                ></span>
-                <span>Show Claude Code Items</span>
-              </div>
-            </div>
-
-            <div
-              className="history-item"
-              onClick={() => {
-                postMessage({
-                  type: "openSettings",
-                  setting: "promptForge.showCursorRules",
-                });
-                setSettingsOpen(false);
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <span
-                  className={`codicon codicon-${state.settings.showCursorRules ? "check" : "blank"}`}
-                ></span>
-                <span>Show Cursor Items</span>
-              </div>
-            </div>
-
-            <div
-              className="history-item"
-              onClick={() => {
-                postMessage({
-                  type: "toggleWorkspaceSkills",
-                });
-                setSettingsOpen(false);
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <span
-                  className={`codicon codicon-${state.settings.showWorkspaceSkills ? "check" : "blank"}`}
-                ></span>
-                <span>Show Skills from workspace</span>
+                <span className="codicon codicon-shield"></span>
+                <span>Features & Permissions...</span>
               </div>
             </div>
           </div>
@@ -1818,69 +1743,59 @@ const App: React.FC = () => {
             ),
           },
           {
-            id: "claude",
-            title: "Claude Integration",
-            icon: "claude",
+            id: "sources",
+            title: "Custom Prompt Sources",
+            icon: "library",
             content: (
-              <div>
-                <p>
-                  Allow Prompt Foundry to read Claude Code skills and commands.
-                </p>
-                <button
-                  className="main-btn"
-                  onClick={() =>
-                    postMessage({
-                      type: "openSettings",
-                      setting: "promptForge.showClaudeCodeBlocks",
-                    })
-                  }
-                >
-                  Configure Claude Settings
-                </button>
-              </div>
-            ),
-          },
-          {
-            id: "cursor",
-            title: "Cursor Integration",
-            icon: "cursor",
-            content: (
-              <div>
-                <p>Allow Prompt Foundry to read Cursor rules.</p>
-                <button
-                  className="main-btn"
-                  onClick={() =>
-                    postMessage({
-                      type: "openSettings",
-                      setting: "promptForge.showCursorRules",
-                    })
-                  }
-                >
-                  Configure Cursor Settings
-                </button>
-              </div>
-            ),
-          },
-          {
-            id: "workspace",
-            title: "Skills (Workspace)",
-            icon: "files",
-            content: (
-              <div>
-                <p>
-                  Allow Prompt Foundry to read skills from your current vscode workspace (<code>.skills/</code> or <code>skills/</code> directories).
-                </p>
-                <button
-                  className="main-btn"
-                  onClick={() =>
-                    postMessage({
-                      type: "openSettings",
-                      setting: "promptForge.showWorkspaceSkills",
-                    })
-                  }
-                >
-                  Configure Workspace Settings
-                </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div>
+                  <p style={{ margin: "0 0 8px 0" }}>Import prompt blocks from external AI tools:</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    <button
+                      className="main-btn"
+                      style={{ flex: "1 1 auto", padding: "4px 8px", fontSize: "0.85em" }}
+                      onClick={() => postMessage({ type: "openSettings", setting: "promptForge.showClaudeCodeBlocks" })}
+                    >
+                      Claude Code
+                    </button>
+                    <button
+                      className="main-btn"
+                      style={{ flex: "1 1 auto", padding: "4px 8px", fontSize: "0.85em" }}
+                      onClick={() => postMessage({ type: "openSettings", setting: "promptForge.showCursorRules" })}
+                    >
+                      Cursor
+                    </button>
+                    <button
+                      className="main-btn"
+                      style={{ flex: "1 1 auto", padding: "4px 8px", fontSize: "0.85em" }}
+                      onClick={() => postMessage({ type: "openSettings", setting: "promptForge.showWorkspaceSkills" })}
+                    >
+                      Workspace Skills
+                    </button>
+                  </div>
+                </div>
+                
+                <div style={{ borderTop: "1px solid var(--vscode-widget-border)", paddingTop: "12px" }}>
+                  <p style={{ margin: "0 0 8px 0" }}>Add your own custom external folders:</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    <button
+                      className="main-btn"
+                      style={{ flex: "1 1 auto", padding: "4px 8px", fontSize: "0.85em" }}
+                      onClick={() => postMessage({ type: "openSettings", setting: "promptForge.customFolders" })}
+                    >
+                      Custom Folder
+                    </button>
+                    {/* 
+                    <button
+                      className="main-btn"
+                      style={{ flex: "1 1 auto", padding: "4px 8px", fontSize: "0.85em" }}
+                      onClick={() => postMessage({ type: "openSettings", setting: "promptForge.customWorkspaceFolders" })}
+                    >
+                      Workspace Folder
+                    </button>
+                    */}
+                  </div>
+                </div>
               </div>
             ),
           },

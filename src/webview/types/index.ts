@@ -72,6 +72,8 @@ export interface State {
     showClaudeCodeBlocks: boolean;
     showCursorRules: boolean;
     showWorkspaceSkills: boolean;
+    customFolders: string[];
+    customWorkspaceFolders: { name: string; path: string }[];
   };
   appName: string;
   lastAction: 'copy' | 'send' | 'append' | null;

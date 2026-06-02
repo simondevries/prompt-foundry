@@ -16,6 +16,8 @@ import {
 } from "./interfaces";
 
 export class LibraryManager {
+  private _categoryPaths: Map<string, string> = new Map();
+
   constructor(
     private _promptBuilderDir: string,
     private _styleManager: StyleManager,
@@ -27,8 +29,12 @@ export class LibraryManager {
     showClaudeCodePromptBlocks: boolean = false,
     showCursorRules: boolean = false,
     workspaceSkillsDirBase?: string,
+    customFolders: string[] = [],
+    customWorkspaceFolders: { name: string; path: string }[] = [],
   ): PromptLibraryCategory[] {
     const categories: PromptLibraryCategory[] = [];
+    this._categoryPaths.clear();
+
     if (!this._fs.existsSync(this._promptBuilderDir)) {
       return categories;
     }
@@ -93,6 +99,23 @@ export class LibraryManager {
 
     this.addCategory(categories, "Tools", "", SPECIAL_TOOLS.map(t => t.displayName), "tool", false);
 
+    // Add custom folders (at the bottom)
+    for (const folder of customFolders) {
+      if (this._fs.existsSync(folder)) {
+        const categoryName = path.basename(folder);
+        const files = this.getPromptFiles(folder);
+        this.addCategory(categories, categoryName, folder, files, 'system', false);
+      }
+    }
+
+    // Add custom workspace folders
+    for (const folder of customWorkspaceFolders) {
+      if (this._fs.existsSync(folder.path)) {
+        const files = this.getPromptFiles(folder.path);
+        this.addCategory(categories, folder.name, folder.path, files, 'system', false);
+      }
+    }
+
     return categories;
   }
 
@@ -151,6 +174,8 @@ export class LibraryManager {
     const isBundled = this._extensionDir && resolvedPath.startsWith(path.resolve(this._extensionDir));
     const effectiveType = isBundled ? 'system' : type;
     
+    this._categoryPaths.set(name, folderPath);
+
     categories.push({
       name,
       path: folderPath,
@@ -189,6 +214,9 @@ export class LibraryManager {
   }
 
   public getCategoryPath(category: string): string {
+    const cached = this._categoryPaths.get(category);
+    if (cached) return cached;
+
     if (category === "Claude Skills") {
       return CLAUDE_SKILLS_DIR;
     } else if (category === "Claude Commands") {
@@ -304,7 +332,8 @@ export class LibraryManager {
       const lowerVarName = varName.toLowerCase();
       
       // Skip if it's already defined or if it's a reserved system variable
-      if (!variables[varName] && !RESERVED_VAR_NAMES.includes(lowerVarName)) {
+      const isAlreadyDefined = Object.keys(variables).some(k => k.toLowerCase() === lowerVarName);
+      if (!isAlreadyDefined && !RESERVED_VAR_NAMES.includes(lowerVarName)) {
         variables[varName] = { type: "text" };
       }
     }

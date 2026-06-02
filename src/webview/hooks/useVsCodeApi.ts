@@ -40,6 +40,8 @@ export function useVsCodeApi() {
         showClaudeCodeBlocks: false,
         showCursorRules: false,
         showWorkspaceSkills: false,
+        customFolders: [],
+        customWorkspaceFolders: [],
       },
       appName: "",
       lastAction: null,
