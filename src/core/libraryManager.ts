@@ -17,6 +17,8 @@ import {
 
 export class LibraryManager {
   private _categoryPaths: Map<string, string> = new Map();
+  private _customFolders: string[] = [];
+  private _customWorkspaceFolders: { name: string; path: string }[] = [];
 
   constructor(
     private _promptBuilderDir: string,
@@ -30,8 +32,15 @@ export class LibraryManager {
     showCursorRules: boolean = false,
     workspaceSkillsDirBase?: string,
     customFolders: string[] = [],
-    customWorkspaceFolders: { name: string; path: string }[] = [],
+    customWorkspaceFolders: string[] = [],
   ): PromptLibraryCategory[] {
+    this._customFolders = customFolders;
+    // We store these as resolved internal structures for getCategoryPath consistency
+    this._customWorkspaceFolders = customWorkspaceFolders.map(p => ({
+      name: path.basename(p),
+      path: workspaceSkillsDirBase ? path.join(workspaceSkillsDirBase, p) : p
+    }));
+
     const categories: PromptLibraryCategory[] = [];
     this._categoryPaths.clear();
 
@@ -115,7 +124,7 @@ export class LibraryManager {
     }
 
     // Add custom workspace folders
-    for (const folder of customWorkspaceFolders) {
+    for (const folder of this._customWorkspaceFolders) {
       if (this._fs.existsSync(folder.path)) {
         const files = this.getPromptFiles(folder.path);
         this.addCategory(categories, folder.name, folder.path, files, 'system', false);
@@ -229,9 +238,23 @@ export class LibraryManager {
       return CLAUDE_COMMANDS_DIR;
     } else if (category === "Cursor") {
       return CURSOR_RULES_DIR;
-    } else {
-      return path.join(this._promptBuilderDir, category);
     }
+
+    // Try custom folders fallback
+    for (const folder of this._customFolders) {
+      if (path.basename(folder) === category) {
+        return folder;
+      }
+    }
+
+    // Try custom workspace folders fallback
+    for (const folder of this._customWorkspaceFolders) {
+      if (folder.name === category) {
+        return folder.path;
+      }
+    }
+
+    return path.join(this._promptBuilderDir, category);
   }
 
   public parseBlockMetadata(content: string): { variables: Record<string, any>; metadata: Record<string, any> } | null {
@@ -359,6 +382,20 @@ export class LibraryManager {
   public setPromptBuilderDir(dir: string) {
     this._promptBuilderDir = dir;
   }
+
+  public setCustomFolders(folders: string[]) {
+    this._customFolders = folders;
+  }
+
+  public setCustomWorkspaceFolders(folders: string[]) {
+    // We store these as resolved internal structures for getCategoryPath consistency
+    // Note: LibraryManager doesn't store workspaceSkillsDirBase, so we can't fully resolve 
+    // until getPromptLibrary is called. However, we can store the raw strings for now.
+    // Actually, it's better if setCustomWorkspaceFolders handles the strings.
+    this._rawCustomWorkspaceFolders = folders;
+  }
+
+  private _rawCustomWorkspaceFolders: string[] = [];
 
   public get promptBuilderDir(): string {
     return this._promptBuilderDir;

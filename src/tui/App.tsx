@@ -151,11 +151,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
         pm.setCustomFolders(config.customFolders);
       }
       if (config.customWorkspaceFolders) {
-        const resolvedWorkspaceFolders = config.customWorkspaceFolders.map((p) => ({
-          name: path.basename(p),
-          path: path.join(workspaceRoot, p),
-        }));
-        pm.setCustomWorkspaceFolders(resolvedWorkspaceFolders);
+        pm.setCustomWorkspaceFolders(config.customWorkspaceFolders);
       }
       if (config.showWorkspaceSkills) {
         pm.setWorkspaceSkillsDir(workspaceRoot);
@@ -170,10 +166,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
       config?.showClaudeCodeBlocks || false, 
       config?.showCursorRules || false,
       config?.customFolders,
-      config?.customWorkspaceFolders ? config.customWorkspaceFolders.map(p => ({
-        name: path.basename(p),
-        path: path.join(workspaceRoot, p)
-      })) : []
+      config?.customWorkspaceFolders
     ));
     setGroups(pm.getGroupLibrary());
     setActiveBlocks([...pm.getActiveBlocks()]);
@@ -214,8 +207,9 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
         const fullPath = path.join(cat.path, file);
         if (!activePaths.has(fullPath)) {
           const disabled = isUnavailable(cat.name, file);
+          const blockKey = `${cat.name}:${file}:${fullPath}`;
           blocks.push({ 
-            key: fullPath,
+            key: blockKey,
             label: disabled ? `[${cat.name}] ${file} (not available in TUI)` : `[${cat.name}] ${file}`, 
             value: { category: cat.name, name: file, path: fullPath },
             disabled
@@ -246,7 +240,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
 
   const handleSelectBlock = (item: { label: string, value: { category: string, name: string, path: string }, disabled?: boolean }) => {
     if (!manager || item.disabled) return;
-    const { category, name } = item.value;
+    const { category, name, path: blockPath } = item.value;
     try {
       const content = manager.getPromptBlockContent(category, name);
       const meta = manager.parseBlockMetadata(content);
@@ -264,12 +258,12 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
       }
 
       if (vars.length > 0) {
-        setPendingBlock({ category, name, content, vars });
+        setPendingBlock({ category, name, content, vars, explicitPath: blockPath } as any);
         setVariableValues({});
         setCurrentVarIndex(0);
         setLeftView('VariableInput');
       } else {
-        manager.addActiveBlock(category, name);
+        manager.addActiveBlock(category, name, undefined, blockPath);
         refreshActiveBlocks(manager);
       }
     } catch (e) {
@@ -298,7 +292,12 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
       setCurrentVarIndex(currentVarIndex + 1);
     } else {
       try {
-        manager.addActiveBlock(pendingBlock.category, pendingBlock.name, newValues);
+        manager.addActiveBlock(
+          pendingBlock.category,
+          pendingBlock.name,
+          newValues,
+          (pendingBlock as any).explicitPath,
+        );
         refreshActiveBlocks(manager);
         setPendingBlock(null);
         setLeftView('Categories');

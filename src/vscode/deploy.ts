@@ -116,11 +116,6 @@ export async function updateTuiConfig(context: vscode.ExtensionContext) {
     const showCursorRules = config.get<boolean>("showCursorRules", false);
     const showWorkspaceSkills = config.get<boolean>("showWorkspaceSkills", false);
     const historyRetentionLimit = config.get<number>("historyRetentionLimit", 50);
-    const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
-    const showClaudeCodeBlocks = config.get<boolean>("showClaudeCodeBlocks", false);
-    const showCursorRules = config.get<boolean>("showCursorRules", false);
-    const showWorkspaceSkills = config.get<boolean>("showWorkspaceSkills", false);
-    const historyRetentionLimit = config.get<number>("historyRetentionLimit", 50);
     const mentionExcludeFolders = config.get<string[]>("mentionExcludeFolders", ["node_modules", "dist", "out", ".git", ".pnpm-store"]);
 
     const tuiConfig = {

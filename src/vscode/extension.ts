@@ -108,13 +108,7 @@ export async function activate(context: vscode.ExtensionContext) {
   promptManager.setCustomFolders(customFolders);
 
   const customWorkspaceFolders = config.get<string[]>("customWorkspaceFolders", []);
-  if (workspaceRoot) {
-    const resolvedWorkspaceFolders = customWorkspaceFolders.map((p) => ({
-      name: path.basename(p),
-      path: path.join(workspaceRoot, p),
-    }));
-    promptManager.setCustomWorkspaceFolders(resolvedWorkspaceFolders);
-  }
+  promptManager.setCustomWorkspaceFolders(customWorkspaceFolders);
 
   const webviewProvider = new MainPromptWebviewProvider(
     context.extensionUri,
@@ -221,13 +215,7 @@ export async function activate(context: vscode.ExtensionContext) {
         promptManager.setCustomFolders(customFolders);
 
         const customWorkspaceFolders = config.get<string[]>("customWorkspaceFolders", []);
-        if (workspaceRoot) {
-          const resolvedWorkspaceFolders = customWorkspaceFolders.map((p) => ({
-            name: path.basename(p),
-            path: path.join(workspaceRoot, p),
-          }));
-          promptManager.setCustomWorkspaceFolders(resolvedWorkspaceFolders);
-        }
+        promptManager.setCustomWorkspaceFolders(customWorkspaceFolders);
 
         webviewProvider.refresh();
       }

@@ -39,14 +39,19 @@ export class PromptManager {
     for (const folder of folders) {
       this._fs.trustPath(folder, FsPermission.Read);
     }
+    this._libraryManager.setCustomFolders(folders);
     this.reload();
   }
 
-  public setCustomWorkspaceFolders(folders: { name: string; path: string }[]) {
+  public setCustomWorkspaceFolders(folders: string[]) {
     this._customWorkspaceFolders = folders;
-    for (const folder of folders) {
-      this._fs.trustPath(folder.path, FsPermission.Read);
+    if (this._workspaceSkillsDir) {
+      for (const folder of folders) {
+        const resolvedPath = path.join(this._workspaceSkillsDir, folder);
+        this._fs.trustPath(resolvedPath, FsPermission.Read);
+      }
     }
+    this._libraryManager.setCustomWorkspaceFolders(folders);
     this.reload();
   }
 
@@ -55,7 +60,7 @@ export class PromptManager {
   private _mainCollidedNames: Record<string, boolean> = {};
   private _activeBlocks: PromptBlock[] = [];
   private _customFolders: string[] = [];
-  private _customWorkspaceFolders: { name: string; path: string }[] = [];
+  private _customWorkspaceFolders: string[] = [];
   private _associationManager: AssociationManager;
   private _libraryManager: LibraryManager;
   private _compiler: PromptCompiler;
@@ -260,7 +265,10 @@ export class PromptManager {
       this._fs.trustPath(folder, FsPermission.Read);
     }
     for (const folder of this._customWorkspaceFolders) {
-      this._fs.trustPath(folder.path, FsPermission.Read);
+      if (this._workspaceSkillsDir) {
+        const resolvedPath = path.join(this._workspaceSkillsDir, folder);
+        this._fs.trustPath(resolvedPath, FsPermission.Read);
+      }
     }
 
     this._associationManager.setPromptBuilderDir(dir);
@@ -604,8 +612,8 @@ export class PromptManager {
   public getPromptLibrary(
     showClaudeCodePromptBlocks: boolean = false,
     showCursorRules: boolean = false,
-    customFolders: string[] = [],
-    customWorkspaceFolders: { name: string; path: string }[] = [],
+    customFolders: string[] = this._customFolders,
+    customWorkspaceFolders: string[] = this._customWorkspaceFolders,
   ): PromptLibraryCategory[] {
     return this._libraryManager.getPromptLibrary(
       showClaudeCodePromptBlocks,
@@ -643,9 +651,10 @@ export class PromptManager {
     category: string,
     filename: string,
     variables?: Record<string, string>,
+    explicitPath?: string,
   ) {
     const folderPath = this._libraryManager.getCategoryPath(category);
-    const filePath = path.join(folderPath, filename);
+    const filePath = explicitPath || path.join(folderPath, filename);
 
     if (!this._activeBlocks.find((b) => b.path === filePath)) {
       let content = "";
@@ -972,7 +981,12 @@ export class PromptManager {
               contextFiles: block.contextFiles || [],
             });
           } else {
-            this.addActiveBlock(block.category, block.name, block.variables);
+            this.addActiveBlock(
+              block.category,
+              block.name,
+              block.variables,
+              block.path,
+            );
           }
         }
       }
@@ -1053,10 +1067,19 @@ export class PromptManager {
 
   public searchPrompts(
     query: string,
+    showClaudeCodePromptBlocks: boolean = false,
+    showCursorRules: boolean = false,
+    customFolders: string[] = this._customFolders,
+    customWorkspaceFolders: string[] = this._customWorkspaceFolders,
   ): Array<{ category: string; name: string; content: string }> {
     const results: Array<{ category: string; name: string; content: string }> =
       [];
-    const library = this.getPromptLibrary(true, true);
+    const library = this.getPromptLibrary(
+      showClaudeCodePromptBlocks,
+      showCursorRules,
+      customFolders,
+      customWorkspaceFolders,
+    );
     const lowerQuery = query.toLowerCase();
 
     for (const category of library) {

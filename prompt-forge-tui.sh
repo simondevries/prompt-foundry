@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Prompt Foundry TUI v0.2.12
 set -euo pipefail
 
 # Resolve the project dir relative to this script, regardless of where it's called from

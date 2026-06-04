@@ -193,15 +193,26 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
                 },
               });
             } else {
-              this._promptManager.addActiveBlock(data.category, data.file);
+              this._promptManager.addActiveBlock(
+                data.category,
+                data.file,
+                undefined,
+                data.path,
+              );
               this.sendBlocksUpdate();
             }
-          } catch (e: any) {
+            } catch (e: any) {
             console.error(`[addBlock] Failed: ${e.message}`, e);
             // Fallback for special/virtual blocks that don't have files
-            this._promptManager.addActiveBlock(data.category, data.file);
+            this._promptManager.addActiveBlock(
+              data.category,
+              data.file,
+              undefined,
+              data.path,
+            );
             this.sendBlocksUpdate();
-          }
+            }
+
           break;
         case "addBlockWithVariables":
           if (data.file === "Git Specific Commit") {
@@ -244,9 +255,11 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               data.category,
               data.file,
               data.variables,
+              data.path,
             );
             this.sendBlocksUpdate();
           }
+
           break;
 
         case "removeBlock":

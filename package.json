@@ -72,17 +72,17 @@
         "promptForge.showClaudeCodeBlocks": {
           "type": "boolean",
           "default": false,
-          "description": "Show Claude Code skills, commands, and instructions as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .claude/ directory."
+          "description": "Show Claude Code skills, commands, and instructions as prompt blocks."
         },
         "promptForge.showCursorRules": {
           "type": "boolean",
           "default": false,
-          "description": "Show Cursor rules and .mdc files as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .cursor/ directory."
+          "description": "Show Cursor rules and .mdc files as prompt blocks."
         },
         "promptForge.showWorkspaceSkills": {
           "type": "boolean",
           "default": false,
-          "description": "Show skills from your workspace as prompt blocks. DISCLAIMER: Enabling this allows Prompt Foundry to read files from your .skills/ or skills/ directories in your workspace."
+          "description": "Show skills from your workspace as prompt blocks."
         },
         "promptForge.customFolders": {
           "type": "array",
