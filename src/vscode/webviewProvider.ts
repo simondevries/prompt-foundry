@@ -670,7 +670,7 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
             const promptRoot = this._promptManager.getPromptBuilderDir();
             const config = {
               mcpServers: {
-                "prompt-forge": {
+                "prompt-foundry": {
                   command: "node",
                   args: [mcpPath],
                   env: {

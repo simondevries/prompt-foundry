@@ -101,8 +101,8 @@ Install the extension from the [VS Code Marketplace](https://marketplace.visuals
 
 1. Open the extension
 2. Click the gear next to `Prompt Block Library`
-3. Click `Setup MCP Server...`
-4. Copy the JSON snippet
+3. Click `Features & Permissions` > `MCP Server`
+4. Copy the generated JSON snippet
 5. Add it to your AI's MCP config
 
 > Note: The MCP server runs locally as a Node.js process in the VS Code extension folder. The AI can read and modify the content of the specified prompt library folder via MCP tool calls.

@@ -54,6 +54,12 @@ export class LibraryManager {
       this.addCategory(categories, item.name, folderPath, files, 'user', true);
     }
 
+    // Check for prompt files in the root directory (Direct Mode)
+    const rootFiles = this.getPromptFiles(this._promptBuilderDir);
+    if (rootFiles.length > 0) {
+      this.addCategory(categories, 'General', this._promptBuilderDir, rootFiles, 'user', false);
+    }
+
     // Explicitly add AI-Contracts as a system category
     const aiContractsPath = path.join(this._promptBuilderDir, 'AI-Contracts');
     if (this._fs.existsSync(aiContractsPath)) {

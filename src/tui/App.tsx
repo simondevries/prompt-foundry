@@ -146,7 +146,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
     if (mainInstrFromFile) {
       pm.updateMainInstruction(mainInstrFromFile);
     }
-  }, [arg, outputArg]);
+  }, [arg, outputArg, libraryPath]);
 
   // Filter out blocks already in the active stack
   const activePaths = useMemo(() => new Set(activeBlocks.map(b => b.path)), [activeBlocks]);
@@ -563,7 +563,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
       </Box>
 
       {/* Footer Instructions / Keyboard Shortcuts */}
-      <Box marginTop={0} paddingX={1}>
+      <Box marginTop={0} paddingX={1} flexDirection="column">
         <Box flexGrow={1}>
           {statusMessage ? (
             <Text color="green" bold>{statusMessage}</Text>
@@ -576,6 +576,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
             </Text>
           )}
         </Box>
+        <Text color="gray" dimColor>Path: {manager?.promptBuilderDir}</Text>
       </Box>
     </Box>
   );

@@ -1,17 +1,17 @@
-
 {% comment %}
 vars:
-  target_template:
-    type: promptBlock
-    label: "Template to improve (e.g., Category: [Category], Name: [name.md])"
+target_template:
+type: promptBlock
+label: "Template to improve (e.g., Category: [Category], Name: [name.md])"
 {% endcomment %}
-<!-- 
-# version: 1.0
+
+<!--
+# version: 1.1
 # ReferenceLocation: workflow
-# Reference: Run a self-improvement loop on the "{{ target_template }}" template as per "{{blockName}}"
+# Reference: Update the prompt forge block with new information gathered this conversation, as per instructions in "{{blockName}}"
 -->
 
-Run a self-improvement loop to review and enhance a Prompt Sandbox template.
+Run a self-improvement loop on the Prompt foundry prompt block {{ target_template}} to improve the context and information in that block with learnings and discoveries from this conversation
 
 ## Workflow Steps
 
@@ -22,5 +22,7 @@ Run a self-improvement loop to review and enhance a Prompt Sandbox template.
 4. **Confirm:** Let me know that the proposal is ready and wait for me to confirm the edit in the UI.
 
 ## Constraints
+
+- The prompt block is a generic piece of reusable information that can be attached on future conversations. Do not add details that are highly specific to this task
 - You MUST use the MCP server tools for proposing changes. Do not just print the markdown in our chat window.
-- Ensure the modified template strictly follows the standard prompt architecture (Goal, Expectations, Constraints).
+- Unless absolutely necessary, only make incremental changes.

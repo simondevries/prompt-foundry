@@ -1288,6 +1288,22 @@ const App: React.FC = () => {
               className="history-item"
               onClick={() => {
                 setSettingsOpen(false);
+                postMessage({ type: "getMcpConfig" });
+                setPermissionsModal({ open: true, defaultExpanded: "tui" });
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span className="codicon codicon-terminal"></span>
+                <span>TUI Dashboard...</span>
+              </div>
+            </div>
+
+            <div
+              className="history-item"
+              onClick={() => {
+                setSettingsOpen(false);
                 setPermissionsModal({ open: true, defaultExpanded: "folder" });
               }}
             >
@@ -1744,12 +1760,12 @@ const App: React.FC = () => {
           },
           {
             id: "sources",
-            title: "Custom Prompt Sources",
+            title: "Custom library sources",
             icon: "library",
             content: (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div>
-                  <p style={{ margin: "0 0 8px 0" }}>Import prompt blocks from external AI tools:</p>
+                  <p style={{ margin: "0 0 8px 0" }}>Import prompts from external locations:</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                     <button
                       className="main-btn"
@@ -1783,7 +1799,7 @@ const App: React.FC = () => {
                       style={{ flex: "1 1 auto", padding: "4px 8px", fontSize: "0.85em" }}
                       onClick={() => postMessage({ type: "openSettings", setting: "promptForge.customFolders" })}
                     >
-                      Custom Folder
+                      Custom Folder (can be any folder with markdown files)
                     </button>
                     {/* 
                     <button
@@ -1806,10 +1822,18 @@ const App: React.FC = () => {
             content: (
               <div>
                 <p>
-                  The Prompt Foundry TUI is a standalone dashboard that lets you
-                  access your prompt library from external AI CLI tools like
-                  Claude Code.
+                  The Prompt Foundry TUI is a standalone terminal app that lets you
+                  access your prompt library and compile a prompt from external tools.
+                  Especially built for AI CLI tools like Claude Code.
                 </p>
+
+                <h4 style={{ margin: "16px 0 6px" }}>Run directly</h4>
+                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
+                  Use the following script to run the TUI:
+                </p>
+                <CopyablePre
+                  content={`${state.tuiPath ? `"${state.tuiPath}"` : "/path/to/prompt-forge-tui.sh"}${state.settings.promptFolder ? ` --library "${state.settings.promptFolder}"` : ""}`}
+                />
 
                 <h4 style={{ margin: "12px 0 6px" }}>Setup for Claude Code</h4>
                 <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
@@ -1823,33 +1847,14 @@ const App: React.FC = () => {
 }`}
                 />
 
-                <h4 style={{ margin: "16px 0 6px" }}>General Terminal Usage</h4>
+                <h4 style={{ margin: "16px 0 6px" }}>Other CLI apps</h4>
                 <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
-                  Set the EDITOR environment variable in your shell
-                  profile (.zshrc or .bashrc):
+                    See if your CLI app supports a custom environmental variable or customer external editor app.
+                    You can use the following env variable to set the editor to the TUI.
                 </p>
                 <CopyablePre
                   content={`export EDITOR="${state.tuiPath ? `\\"${state.tuiPath}\\"` : "/path/to/prompt-forge-tui.sh"} --new-window${state.settings.promptFolder ? ` --library \\"${state.settings.promptFolder}\\"` : ""}"`}
                 />
-
-                <h4 style={{ margin: "16px 0 6px" }}>Run directly</h4>
-                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
-                  Open the dashboard directly in your current terminal:
-                </p>
-                <CopyablePre
-                  content={`${state.tuiPath ? `"${state.tuiPath}"` : "/path/to/prompt-forge-tui.sh"}${state.settings.promptFolder ? ` --library "${state.settings.promptFolder}"` : ""}`}
-                />
-
-                <div
-                  className="banner banner-attention"
-                  style={{ marginTop: "12px", fontSize: "0.85em" }}
-                >
-                  Note: Setting EDITOR globally
-                  will cause all terminal tools (like git commit) to
-                  launch the Prompt Foundry dashboard. If you prefer to keep
-                  your default editor for other tasks, use the Claude-specific
-                  setting above.
-                </div>
               </div>
             ),
           },

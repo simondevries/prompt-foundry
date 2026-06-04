@@ -258,6 +258,7 @@ export function useVsCodeApi() {
     // Signal to extension that we are ready
     vscode.current.postMessage({ type: "webviewReady" });
     vscode.current.postMessage({ type: "getPromptBlocksSettings" });
+    vscode.current.postMessage({ type: "getMcpConfig" });
 
     return () => window.removeEventListener("message", messageListener);
   }, []);

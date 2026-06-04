@@ -62,7 +62,7 @@
       }
     ],
     "configuration": {
-      "title": "Prompt Forge",
+      "title": "Prompt Foundry",
       "properties": {
         "promptForge.promptFolder": {
           "type": "string",
@@ -124,8 +124,10 @@
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "build:tui": "esbuild src/tui/index.tsx --bundle --platform=node --format=esm --outfile=dist/tui.js --external:ink --external:react --external:react-dom",
-    "tui": "node dist/tui.js"
+    "build:tui": "esbuild src/tui/index.tsx --bundle --platform=node --format=esm --outfile=dist/tui.bundle.mjs --alias:react-devtools-core=./src/core/stubs.ts --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --external:assert --external:fs --external:path --external:os --external:util --external:child_process --external:events --external:stream --external:tty --external:url --external:module --external:process",
+    "build:mcp": "esbuild src/mcp/server.ts --bundle --platform=node --outfile=dist/mcp.bundle.js",
+    "build:all": "pnpm run compile && pnpm run build:tui && pnpm run build:mcp",
+    "tui": "node dist/tui.bundle.mjs"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

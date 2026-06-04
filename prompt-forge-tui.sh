@@ -107,16 +107,17 @@ if [[ "$NEW_WINDOW" == true ]]; then
     # Always clean up temp dir on script exit (normal, error, or signal)
     trap 'rm -rf "$TEMP_DIR"' EXIT
 
-    LIB_ARG=""
+    LIB_ARG_CMD=""
     if [[ -n "$LIBRARY_PATH" ]]; then
-        LIB_ARG="--library $LIBRARY_PATH"
+        # Quote the path for the heredoc/shell execution
+        LIB_ARG_CMD="--library \"$LIBRARY_PATH\""
     fi
 
     cat > "$LAUNCHER_SCRIPT" << LAUNCHER
 #!/usr/bin/env bash
 cd "${PROJECT_DIR}"
 clear
-node "${BUNDLE_PATH}" "${ORIGINAL_FILE}" "${TEMP_FILE_ATOMIC}" ${LIB_ARG}
+node "${BUNDLE_PATH}" "${ORIGINAL_FILE}" "${TEMP_FILE_ATOMIC}" ${LIB_ARG_CMD}
 # Atomic rename so the parent never reads a partial file
 if [[ -s "${TEMP_FILE_ATOMIC}" ]]; then
     mv "${TEMP_FILE_ATOMIC}" "${TEMP_FILE}"
@@ -157,4 +158,4 @@ if [[ -n "$LIBRARY_PATH" ]]; then
     LIB_ARG_ARRAY=("--library" "$LIBRARY_PATH")
 fi
 
-(cd "$PROJECT_DIR" && node "$BUNDLE_PATH" "${POSITIONAL_ARGS[@]}" "${LIB_ARG_ARRAY[@]}") < /dev/tty
+(cd "$PROJECT_DIR" && node "$BUNDLE_PATH" ${POSITIONAL_ARGS[@]+"${POSITIONAL_ARGS[@]}"} ${LIB_ARG_ARRAY[@]+"${LIB_ARG_ARRAY[@]}"}) < /dev/tty
