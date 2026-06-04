@@ -34,9 +34,10 @@ export class LibraryManager {
     customFolders: string[] = [],
     customWorkspaceFolders: string[] = [],
   ): PromptLibraryCategory[] {
-    this._customFolders = customFolders;
+    this._customFolders = Array.isArray(customFolders) ? customFolders.filter(f => typeof f === 'string' && f) : [];
+    const validWorkspaceFolders = Array.isArray(customWorkspaceFolders) ? customWorkspaceFolders.filter(f => typeof f === 'string' && f) : [];
     // We store these as resolved internal structures for getCategoryPath consistency
-    this._customWorkspaceFolders = customWorkspaceFolders.map(p => ({
+    this._customWorkspaceFolders = validWorkspaceFolders.map(p => ({
       name: path.basename(p),
       path: workspaceSkillsDirBase ? path.join(workspaceSkillsDirBase, p) : p
     }));
@@ -392,7 +393,7 @@ export class LibraryManager {
     // Note: LibraryManager doesn't store workspaceSkillsDirBase, so we can't fully resolve 
     // until getPromptLibrary is called. However, we can store the raw strings for now.
     // Actually, it's better if setCustomWorkspaceFolders handles the strings.
-    this._rawCustomWorkspaceFolders = folders;
+    this._rawCustomWorkspaceFolders = Array.isArray(folders) ? folders.filter(f => typeof f === 'string' && f) : [];
   }
 
   private _rawCustomWorkspaceFolders: string[] = [];

@@ -36,6 +36,9 @@ export class SecureFileSystem {
   }
 
   public trustPath(filePath: string, permission: FsPermission = FsPermission.Read): void {
+    if (typeof filePath !== 'string' || !filePath) {
+      return;
+    }
     const resolved = path.resolve(filePath);
     if (!this._roots.find(r => r.path === resolved)) {
       this._roots.push({ path: resolved, permission });

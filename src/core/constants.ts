@@ -47,6 +47,8 @@ export const BUNDLED_CATEGORIES = [
   "Cursor",
   "AI-Contracts",
   "Tools",
+  "Skills (workspace)",
+  "Special",
 ];
 
 // Claude Code paths

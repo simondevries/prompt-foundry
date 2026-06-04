@@ -35,23 +35,27 @@ export class PromptManager {
   }
 
   public setCustomFolders(folders: string[]) {
-    this._customFolders = folders;
-    for (const folder of folders) {
+    if (!Array.isArray(folders)) return;
+    const validFolders = folders.filter(f => typeof f === 'string' && f);
+    this._customFolders = validFolders;
+    for (const folder of validFolders) {
       this._fs.trustPath(folder, FsPermission.Read);
     }
-    this._libraryManager.setCustomFolders(folders);
+    this._libraryManager.setCustomFolders(validFolders);
     this.reload();
   }
 
   public setCustomWorkspaceFolders(folders: string[]) {
-    this._customWorkspaceFolders = folders;
+    if (!Array.isArray(folders)) return;
+    const validFolders = folders.filter(f => typeof f === 'string' && f);
+    this._customWorkspaceFolders = validFolders;
     if (this._workspaceSkillsDir) {
-      for (const folder of folders) {
+      for (const folder of validFolders) {
         const resolvedPath = path.join(this._workspaceSkillsDir, folder);
         this._fs.trustPath(resolvedPath, FsPermission.Read);
       }
     }
-    this._libraryManager.setCustomWorkspaceFolders(folders);
+    this._libraryManager.setCustomWorkspaceFolders(validFolders);
     this.reload();
   }
 
@@ -162,9 +166,6 @@ export class PromptManager {
   public canModifyCategory(category?: string): boolean {
     if (!category) return false;
     if (BUNDLED_CATEGORIES.includes(category)) {
-      return false;
-    }
-    if (category === "Skills (workspace)" || category === "Special" || category === "Tools") {
       return false;
     }
 

@@ -81,7 +81,7 @@ const PromptBlocksPanel: React.FC<PromptBlocksPanelProps> = ({
 
             return (
               <li
-                key={res.path}
+                key={`${res.category}:${res.file}:${res.path}`}
                 className="list-item add-block-item"
                 onClick={() => onAddBlock(res.category, res.file, res.path)}
               >

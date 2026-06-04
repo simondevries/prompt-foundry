@@ -201,9 +201,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const library = promptManager.getPromptLibrary(false);
 
       const filteredLibrary = library.filter(
-        (category) =>
-          !BUNDLED_CATEGORIES.includes(category.name) &&
-          category.name !== "Special",
+        (category) => !BUNDLED_CATEGORIES.includes(category.name),
       );
 
       const enrichedLibrary = filteredLibrary.map((category) => {
@@ -248,7 +246,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("Invalid arguments: category and name must be strings");
       }
 
-      if (BUNDLED_CATEGORIES.includes(category) || category === "Special") {
+      if (BUNDLED_CATEGORIES.includes(category)) {
         throw new Error(`Access denied: Category '${category}' is protected.`);
       }
 
@@ -289,7 +287,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("Invalid arguments: category and name must be strings");
       }
 
-      if (BUNDLED_CATEGORIES.includes(category) || category === "Special") {
+      if (BUNDLED_CATEGORIES.includes(category)) {
         throw new Error(`Access denied: Category '${category}' is protected.`);
       }
 
@@ -356,7 +354,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("Invalid arguments: category and name must be strings");
       }
 
-      if (BUNDLED_CATEGORIES.includes(category) || category === "Special") {
+      if (BUNDLED_CATEGORIES.includes(category)) {
         throw new Error(`Access denied: Category '${category}' is protected.`);
       }
 
@@ -384,7 +382,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("Invalid arguments: category and name must be strings");
       }
 
-      if (BUNDLED_CATEGORIES.includes(category) || category === "Special") {
+      if (BUNDLED_CATEGORIES.includes(category)) {
         throw new Error(`Access denied: Category '${category}' is protected.`);
       }
 
