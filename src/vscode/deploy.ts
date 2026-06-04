@@ -81,10 +81,69 @@ export async function deployBinaries(context: vscode.ExtensionContext): Promise<
             }
         }
 
+        // 4. Copy TUI Batch Script (Windows)
+        const batSrc = vscode.Uri.joinPath(context.extensionUri, 'prompt-forge-tui.bat');
+        const batDest = vscode.Uri.joinPath(tuiDir, 'prompt-forge-tui.bat');
+        if (fs.existsSync(batSrc.fsPath)) {
+            await vscode.workspace.fs.copy(batSrc, batDest, { overwrite: true });
+        }
+
         // Write version file to skip deployment next time
         await vscode.workspace.fs.writeFile(versionFileUri, new TextEncoder().encode(extensionVersion));
         console.log(`[Prompt Foundry] Binaries deployed to ${storageUri.fsPath}`);
     }
 
+    // Always update config on deploy/activation to ensure it's in sync
+    await updateTuiConfig(context);
+
     return storageUri;
+}
+
+/**
+ * Updates the TUI configuration file in global storage.
+ * This allows the TUI to know about the prompt library location and other settings
+ * without needing explicit CLI flags for everything.
+ */
+export async function updateTuiConfig(context: vscode.ExtensionContext) {
+    const storageUri = context.globalStorageUri;
+    const tuiConfigUri = vscode.Uri.joinPath(storageUri, 'tui', 'tui_config.json');
+    
+    const config = vscode.workspace.getConfiguration("promptForge");
+    const promptFolder = config.get<string>("promptFolder");
+    const customFolders = config.get<string[]>("customFolders", []);
+    const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
+    const showClaudeCodeBlocks = config.get<boolean>("showClaudeCodeBlocks", false);
+    const showCursorRules = config.get<boolean>("showCursorRules", false);
+    const showWorkspaceSkills = config.get<boolean>("showWorkspaceSkills", false);
+    const historyRetentionLimit = config.get<number>("historyRetentionLimit", 50);
+    const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
+    const showClaudeCodeBlocks = config.get<boolean>("showClaudeCodeBlocks", false);
+    const showCursorRules = config.get<boolean>("showCursorRules", false);
+    const showWorkspaceSkills = config.get<boolean>("showWorkspaceSkills", false);
+    const historyRetentionLimit = config.get<number>("historyRetentionLimit", 50);
+    const mentionExcludeFolders = config.get<string[]>("mentionExcludeFolders", ["node_modules", "dist", "out", ".git", ".pnpm-store"]);
+
+    const tuiConfig = {
+        promptFolder,
+        customFolders,
+        customWorkspaceFolders: customWorkspaceFoldersRaw,
+        showClaudeCodeBlocks,
+        showCursorRules,
+        showWorkspaceSkills,
+        historyRetentionLimit,
+        mentionExcludeFolders,
+        extensionVersion: context.extension.packageJSON.version,
+        updatedAt: new Date().toISOString()
+    };
+
+
+
+    try {
+        await vscode.workspace.fs.writeFile(
+            tuiConfigUri, 
+            new TextEncoder().encode(JSON.stringify(tuiConfig, null, 2))
+        );
+    } catch (e) {
+        console.error('[Prompt Foundry] Failed to update TUI config', e);
+    }
 }

@@ -667,6 +667,14 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
                 )
               : "Not found";
 
+            const tuiBatPath = this._globalStorageUri
+              ? path.join(
+                  this._globalStorageUri.fsPath,
+                  "tui",
+                  "prompt-forge-tui.bat",
+                )
+              : "Not found";
+
             const promptRoot = this._promptManager.getPromptBuilderDir();
             const config = {
               mcpServers: {
@@ -683,6 +691,7 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
               type: "updateMcpConfig",
               config: JSON.stringify(config, null, 2),
               tuiPath: tuiPath,
+              tuiBatPath: tuiBatPath,
             });
           }
           break;
@@ -1722,29 +1731,16 @@ export class MainPromptWebviewProvider implements vscode.WebviewViewProvider {
       return p;
     });
 
-    const customWorkspaceFoldersRaw = config.get<string[]>(
+    const customWorkspaceFolders = config.get<string[]>(
       "customWorkspaceFolders",
       [],
     );
-
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    const resolvedWorkspaceFolders: { name: string; path: string }[] = [];
-
-    if (workspaceFolders && workspaceFolders.length > 0) {
-      const rootPath = workspaceFolders[0].uri.fsPath;
-      for (const relPath of customWorkspaceFoldersRaw) {
-        resolvedWorkspaceFolders.push({
-          name: path.basename(relPath),
-          path: path.join(rootPath, relPath),
-        });
-      }
-    }
 
     return {
       showClaudeCodeBlocks,
       showCursorRules,
       customFolders,
-      customWorkspaceFolders: resolvedWorkspaceFolders,
+      customWorkspaceFolders,
     };
   }
 

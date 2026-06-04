@@ -14,7 +14,7 @@ import {
   setupFileWatcher,
   setupEditorListeners,
 } from "./commands";
-import { deployBinaries } from "./deploy";
+import { deployBinaries, updateTuiConfig } from "./deploy";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -107,9 +107,9 @@ export async function activate(context: vscode.ExtensionContext) {
   });
   promptManager.setCustomFolders(customFolders);
 
-  const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
+  const customWorkspaceFolders = config.get<string[]>("customWorkspaceFolders", []);
   if (workspaceRoot) {
-    const resolvedWorkspaceFolders = customWorkspaceFoldersRaw.map((p) => ({
+    const resolvedWorkspaceFolders = customWorkspaceFolders.map((p) => ({
       name: path.basename(p),
       path: path.join(workspaceRoot, p),
     }));
@@ -164,7 +164,18 @@ export async function activate(context: vscode.ExtensionContext) {
   updateSettings();
 
   context.subscriptions.push(
+    vscode.workspace.onDidChangeWorkspaceFolders(() => {
+      updateTuiConfig(context);
+    }),
+  );
+
+  context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
+      // Update TUI config if any promptForge settings changed
+      if (e.affectsConfiguration("promptForge")) {
+        updateTuiConfig(context);
+      }
+
       if (e.affectsConfiguration("promptForge.showClaudeCodeBlocks")) {
         const config = vscode.workspace.getConfiguration("promptForge");
         if (config.get<boolean>("showClaudeCodeBlocks")) {
@@ -209,9 +220,9 @@ export async function activate(context: vscode.ExtensionContext) {
         });
         promptManager.setCustomFolders(customFolders);
 
-        const customWorkspaceFoldersRaw = config.get<string[]>("customWorkspaceFolders", []);
+        const customWorkspaceFolders = config.get<string[]>("customWorkspaceFolders", []);
         if (workspaceRoot) {
-          const resolvedWorkspaceFolders = customWorkspaceFoldersRaw.map((p) => ({
+          const resolvedWorkspaceFolders = customWorkspaceFolders.map((p) => ({
             name: path.basename(p),
             path: path.join(workspaceRoot, p),
           }));

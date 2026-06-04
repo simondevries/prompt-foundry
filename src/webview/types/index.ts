@@ -73,7 +73,7 @@ export interface State {
     showCursorRules: boolean;
     showWorkspaceSkills: boolean;
     customFolders: string[];
-    customWorkspaceFolders: { name: string; path: string }[];
+    customWorkspaceFolders: string[];
   };
   appName: string;
   lastAction: 'copy' | 'send' | 'append' | null;
@@ -85,6 +85,7 @@ export interface State {
   activeTooltipId: string | null;
   mcpConfig: string;
   tuiPath?: string;
+  tuiBatPath?: string;
   suggestions: Block[];
   proposedEdits: ProposedEdit[];
 }

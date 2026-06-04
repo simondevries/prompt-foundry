@@ -1,6 +1,12 @@
 import React from 'react';
 import { render } from 'ink';
 import { App } from './App.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Silence noisy logs in TUI mode
 console.log = () => {};
@@ -28,4 +34,20 @@ for (let i = 2; i < process.argv.length; i++) {
   }
 }
 
-render(<App arg={arg} outputArg={outputArg} libraryPath={libraryPath} />);
+// Load config from tui_config.json if it exists
+let config: any = {};
+try {
+  const configPath = path.join(__dirname, 'tui_config.json');
+  if (fs.existsSync(configPath)) {
+    config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  }
+} catch (e) {
+  // Fallback to empty config
+}
+
+// CLI flag takes precedence over config file
+if (libraryPath) {
+  config.promptFolder = libraryPath;
+}
+
+render(<App arg={arg} outputArg={outputArg} config={config} />);

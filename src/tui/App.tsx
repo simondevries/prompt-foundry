@@ -64,7 +64,16 @@ function SafeSelectInput<V>({ items, onSelect, limit = 15, isFocused = true }: S
 interface AppProps {
   arg?: string;
   outputArg?: string;
-  libraryPath?: string;
+  config?: {
+    promptFolder?: string;
+    customFolders?: string[];
+    customWorkspaceFolders?: string[];
+    showClaudeCodeBlocks?: boolean;
+    showCursorRules?: boolean;
+    showWorkspaceSkills?: boolean;
+    historyRetentionLimit?: number;
+    mentionExcludeFolders?: string[];
+  };
 }
 
 type FocusSection = 'Library' | 'Groups' | 'ActiveStack';
@@ -77,7 +86,7 @@ interface VariableDefinition {
   description?: string;
 }
 
-export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
+export const App: React.FC<AppProps> = ({ arg, outputArg, config }) => {
   const { exit } = useApp();
   const [manager, setManager] = useState<PromptManager | null>(null);
   
@@ -111,7 +120,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
 
   // 1. Initialize core managers
   useEffect(() => {
-    let promptBuilderDir = libraryPath || DEFAULT_PROMPT_BUILDER_DIR;
+    let promptBuilderDir = config?.promptFolder || DEFAULT_PROMPT_BUILDER_DIR;
     let mainInstrFromFile = '';
     let savePath: string | null = outputArg || null;
 
@@ -121,7 +130,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
         if (stats.isFile()) {
           mainInstrFromFile = fs.readFileSync(arg, 'utf8').trim();
           if (!savePath) savePath = arg;
-        } else if (stats.isDirectory() && !libraryPath) {
+        } else if (stats.isDirectory() && !config?.promptFolder) {
           promptBuilderDir = arg;
         }
       }
@@ -133,8 +142,39 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
     const styleManager = new StyleManager(promptBuilderDir, sfs);
     const pm = new PromptManager(promptBuilderDir, styleManager, sfs, undefined, false);
     
+    // Resolve dynamic workspace root based on execution context
+    const workspaceRoot = process.cwd();
+
+    // Apply additional config if present
+    if (config) {
+      if (config.customFolders) {
+        pm.setCustomFolders(config.customFolders);
+      }
+      if (config.customWorkspaceFolders) {
+        const resolvedWorkspaceFolders = config.customWorkspaceFolders.map((p) => ({
+          name: path.basename(p),
+          path: path.join(workspaceRoot, p),
+        }));
+        pm.setCustomWorkspaceFolders(resolvedWorkspaceFolders);
+      }
+      if (config.showWorkspaceSkills) {
+        pm.setWorkspaceSkillsDir(workspaceRoot);
+      }
+      if (config.historyRetentionLimit !== undefined) {
+        pm.setHistoryRetentionLimit(config.historyRetentionLimit);
+      }
+    }
+
     setManager(pm);
-    setCategories(pm.getPromptLibrary(true, true));
+    setCategories(pm.getPromptLibrary(
+      config?.showClaudeCodeBlocks || false, 
+      config?.showCursorRules || false,
+      config?.customFolders,
+      config?.customWorkspaceFolders ? config.customWorkspaceFolders.map(p => ({
+        name: path.basename(p),
+        path: path.join(workspaceRoot, p)
+      })) : []
+    ));
     setGroups(pm.getGroupLibrary());
     setActiveBlocks([...pm.getActiveBlocks()]);
 
@@ -146,7 +186,7 @@ export const App: React.FC<AppProps> = ({ arg, outputArg, libraryPath }) => {
     if (mainInstrFromFile) {
       pm.updateMainInstruction(mainInstrFromFile);
     }
-  }, [arg, outputArg, libraryPath]);
+  }, [arg, outputArg, config]);
 
   // Filter out blocks already in the active stack
   const activePaths = useMemo(() => new Set(activeBlocks.map(b => b.path)), [activeBlocks]);

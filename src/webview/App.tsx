@@ -438,6 +438,9 @@ const App: React.FC = () => {
     return false;
   };
 
+  const isWindows = navigator.platform.toLowerCase().includes("win");
+  const platformTuiPath = isWindows ? (state.tuiBatPath || "prompt-forge-tui.bat") : (state.tuiPath || "prompt-forge-tui.sh");
+
   return (
     <div className="app-container">
       {state.proposedEdits && state.proposedEdits.length > 0 && (
@@ -1832,7 +1835,7 @@ const App: React.FC = () => {
                   Use the following script to run the TUI:
                 </p>
                 <CopyablePre
-                  content={`${state.tuiPath ? `"${state.tuiPath}"` : "/path/to/prompt-forge-tui.sh"}${state.settings.promptFolder ? ` --library "${state.settings.promptFolder}"` : ""}`}
+                  content={`"${platformTuiPath}"`}
                 />
 
                 <h4 style={{ margin: "12px 0 6px" }}>Setup for Claude Code</h4>
@@ -1843,7 +1846,7 @@ const App: React.FC = () => {
                 <CopyablePre
                   content={`{
   "useExternalEditor": true,
-  "externalEditor": "${state.tuiPath ? `\\"${state.tuiPath}\\"` : "/path/to/prompt-forge-tui.sh"} --new-window${state.settings.promptFolder ? ` --library \\"${state.settings.promptFolder}\\"` : ""}"
+  "externalEditor": "${isWindows ? platformTuiPath.replace(/\\/g, "\\\\") : platformTuiPath} --new-window"
 }`}
                 />
 
@@ -1853,7 +1856,7 @@ const App: React.FC = () => {
                     You can use the following env variable to set the editor to the TUI.
                 </p>
                 <CopyablePre
-                  content={`export EDITOR="${state.tuiPath ? `\\"${state.tuiPath}\\"` : "/path/to/prompt-forge-tui.sh"} --new-window${state.settings.promptFolder ? ` --library \\"${state.settings.promptFolder}\\"` : ""}"`}
+                  content={`export EDITOR="${isWindows ? platformTuiPath.replace(/\\/g, "\\\\") : platformTuiPath} --new-window"`}
                 />
               </div>
             ),
