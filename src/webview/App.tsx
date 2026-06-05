@@ -1830,15 +1830,18 @@ const App: React.FC = () => {
                   Especially built for AI CLI tools like Claude Code.
                 </p>
 
-                <h4 style={{ margin: "16px 0 6px" }}>Run directly</h4>
+                <h4 style={{ margin: "16px 0 6px" }}>1. Add 'prompt-foundry' command</h4>
                 <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
-                  Use the following script to run the TUI:
+                  Run this command to create a global 'prompt-foundry' shortcut (recommended):
                 </p>
                 <CopyablePre
-                  content={`"${platformTuiPath}"`}
+                  content={isWindows 
+                    ? `mklink "%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps\\prompt-foundry.bat" "${platformTuiPath}"`
+                    : `ln -s "${platformTuiPath}" /usr/local/bin/prompt-foundry`
+                  }
                 />
 
-                <h4 style={{ margin: "12px 0 6px" }}>Setup for Claude Code</h4>
+                <h4 style={{ margin: "16px 0 6px" }}>2. Setup for Claude Code</h4>
                 <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
                   To use Prompt Foundry as your primary prompt editor in Claude
                   Code, update your ~/.claude/settings.json:
@@ -1846,17 +1849,19 @@ const App: React.FC = () => {
                 <CopyablePre
                   content={`{
   "useExternalEditor": true,
-  "externalEditor": "${isWindows ? platformTuiPath.replace(/\\/g, "\\\\") : platformTuiPath} --new-window"
+  "externalEditor": "prompt-foundry --new-window"
 }`}
                 />
 
-                <h4 style={{ margin: "16px 0 6px" }}>Other CLI apps</h4>
+                <h4 style={{ margin: "16px 0 6px" }}>3. Setup for other editors</h4>
                 <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
-                    See if your CLI app supports a custom environmental variable or customer external editor app.
-                    You can use the following env variable to set the editor to the TUI.
+                    You can also set Prompt Foundry as your default terminal editor for any app that uses the $EDITOR variable.
                 </p>
                 <CopyablePre
-                  content={`export EDITOR="${isWindows ? platformTuiPath.replace(/\\/g, "\\\\") : platformTuiPath} --new-window"`}
+                  content={isWindows 
+                    ? `setx EDITOR "prompt-foundry --new-window"`
+                    : `export EDITOR="prompt-foundry --new-window"`
+                  }
                 />
               </div>
             ),
