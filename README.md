@@ -12,18 +12,27 @@
   </a>
 </div>
 
-Prompt Foundry is a VS Code extension that makes AI more consistent and effective in large codebases. Instead of rewriting context every session, you build a personal library of reusable prompt blocks — architecture notes, coding standards, behavioural contracts — and snap them together before each task. A bundled MCP server lets the AI write discoveries back into that library, so your prompts improve over time without manual upkeep.
+Jump to: [Demo](https://github.com/simondevries/prompt-foundry#demo) | [Setup instructions](https://github.com/simondevries/prompt-foundry#demo)
 
-A **prompt block** is a Markdown file in your library containing reusable instructions or context — a coding style guide, an architecture overview, a behavioural contract. You select which blocks to attach before each task; only what's relevant goes in.
+Prompt Foundry is a VS Code extension that makes AI more consistent and effective in large codebases. Instead of rewriting context and task descriptions every session, you build a personal library of reusable prompt blocks\* — architecture notes, coding standards, behavioural contracts and expectations — and snap them together before each task. A bundled MCP server lets the AI write discoveries back into that library, so your prompts improve over time without manual upkeep.
 
-| Problem                                                                      | How Foundry handles it                                                                                                                                                                             |
-| :--------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Knowledge from AI sessions gets lost                                         | Maintain a personal library of context and architecture files (second brain). Updated via MCP tool: "please update xxx block with what we learnt"                                                  |
-| I've added so many `agents.md` instructions and skills, the AI gets confused | Task-specific prompt blocks keep global context lean and targeted                                                                                                                                  |
-| Prompt library not accessible from Claude Code CLI                           | TUI to attach instructions to your prompt directly from the CLI tool                                                                                                                               |
-| AI doesn't behave how I want it                                              | AI Contract defines role, style, and behavioural expectations upfront                                                                                                                              |
-| Some instructions matter more than others                                    | Star a prompt block to surface it as a key goal, or set a reference to position it at the right point in the workflow                                                                              |
-| My MCP tool to my local file system is not powerful enough                   | Use Liquid templating syntax to make prompt blocks more specific; use MCP tools to append to blocks (e.g. keep a log as the AI goes); review changes before committing to the prompt library       |
+\*A **prompt block** a markdown file that represents template prompt in your library which is compiled with other blocks and your main instruction to form a complete prompt before sending to the AI.
+
+| Problem                                                                      | How Foundry handles it                                                                                                                                                                       |
+| :--------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I've added so many `agents.md` instructions and skills, the AI gets confused | Task-specific prompt blocks keep global context lean and targeted                                                                                                                            |
+| Prompt library not accessible from Claude Code CLI                           | TUI to attach instructions to your prompt directly from the CLI tool                                                                                                                         |
+| AI doesn't behave how I want it                                              | AI Contract defines role, style, and behavioural expectations upfront                                                                                                                        |
+| Some instructions matter more than others                                    | Star a prompt block to surface it as a key goal, or set a reference to position it at the right point in the workflow                                                                        |
+| My MCP tool to my local file system is not powerful enough                   | Use Liquid templating syntax to make prompt blocks more specific; use MCP tools to append to blocks (e.g. keep a log as the AI goes); review changes before committing to the prompt library |
+| Knowledge from AI sessions gets lost                                         | Maintain a personal library of context and architecture files (second brain). Updated via MCP tool: "please update xxx block with what we learnt"                                            |
+
+### Overview of features
+
+| VS Code extension                                                                             | MCP server (bundled, optional)                                | TUI (bundled, optional). Works directly from claude code                                                                          |
+| :-------------------------------------------------------------------------------------------- | :------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="assets/vscode.png" style="width:400px" alt="VS Code extension">                     | <img src="assets/MCP.png" style="width:400px" alt="MCP">      | <img src="assets/tui.png" style="width:400px" alt="TUI">                                                                          |
+| Manage prompt library, compile prompts, `@` mentions and `add selection` from editor settings | Give AI access to your prompt block library to update content | Attach prompt blocks to your prompt from the command line. _E.g. in Claude Code you can press Ctrl+G to open the picker directly_ |
 
 ## Benchmark
 
@@ -57,20 +66,13 @@ In short: Run #1 works but accumulates debt. Run #2 reflects an understanding of
 
 </details>
 
-### Overview of features
-
-| VS Code extension                                                                             | MCP server (optional)                                         | TUI (optional)                                                                                                                  |
-| :-------------------------------------------------------------------------------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| <img src="assets/vscode.png" style="width:400px" alt="VS Code extension">                    | <img src="assets/MCP.png" style="width:400px" alt="MCP">     | <img src="assets/tui.png" style="width:400px" alt="TUI">                                                                        |
-| Manage prompt library, compile prompts, `@` mentions and `add selection` from editor settings | Give AI access to your prompt block library to update content | Attach prompt blocks to your prompt from the command line. _E.g. in Claude Code you can press Ctrl+G to open the picker directly_ |
-
 ## How it works
 
 1. Type your prompt
 2. Select your prompt blocks (instructions and information)
 3. Mark the most important ones as goals
 4. Copy/send to AI
-5. Close the loop with MCP: At the end of a session, tell the AI to update your library — e.g. *"update the auth-architecture block using the prompt foundry mcp with what we just decided." Next session, that knowledge is already there.
+5. Close the loop with MCP: At the end of a session, tell the AI to update your library — e.g. \*"update the auth-architecture block using the prompt foundry mcp with what we just decided." Next session, that knowledge is already there.
 
 ### The self-improving library
 
@@ -83,6 +85,7 @@ The MCP server exposes your prompt block library as readable and writable files.
 This means context compounds. Architectural decisions, gotchas, naming conventions — anything worth remembering gets written back in, in the right place, ready for the next session.
 
 ### Example output prompt structure:
+
 <img src="assets/example_prompt.png" style="width:600px" alt="Example prompt">
 
 [See demo](#demo)
@@ -134,8 +137,6 @@ A prompt block is a Markdown file containing reusable instructions or informatio
 - Use TypeScript strict mode
 - Prefer named exports over default exports
 - Add JSDoc comments to all public functions
-
-
 ```
 
 Blocks are organised into categories, one per folder, plus a set of special categories. Optionally add your Claude or Cursor skills too.

@@ -1836,12 +1836,23 @@ const App: React.FC = () => {
                 </p>
                 <CopyablePre
                   content={isWindows 
-                    ? `mklink "%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps\\prompt-foundry.bat" "${platformTuiPath}"`
+                    ? `echo @"${platformTuiPath}" %* > "%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps\\prompt-foundry.bat"`
                     : `ln -s "${platformTuiPath}" /usr/local/bin/prompt-foundry`
                   }
                 />
 
-                <h4 style={{ margin: "16px 0 6px" }}>2. Setup for Claude Code</h4>
+                <h4 style={{ margin: "16px 0 6px" }}>2. Configure $EDITOR for your AI tool</h4>
+                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
+                    Set Prompt Foundry as your default terminal editor. Most AI CLI tools use the $EDITOR variable to open an external prompt editor.
+                </p>
+                <CopyablePre
+                  content={isWindows 
+                    ? `setx EDITOR "prompt-foundry --new-window"`
+                    : `export EDITOR="prompt-foundry --new-window"`
+                  }
+                />
+
+                <h4 style={{ margin: "16px 0 6px" }}>3. Example: Claude Code</h4>
                 <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
                   To use Prompt Foundry as your primary prompt editor in Claude
                   Code, update your ~/.claude/settings.json:
@@ -1851,17 +1862,6 @@ const App: React.FC = () => {
   "useExternalEditor": true,
   "externalEditor": "prompt-foundry --new-window"
 }`}
-                />
-
-                <h4 style={{ margin: "16px 0 6px" }}>3. Setup for other editors</h4>
-                <p style={{ fontSize: "0.85em", opacity: 0.8 }}>
-                    You can also set Prompt Foundry as your default terminal editor for any app that uses the $EDITOR variable.
-                </p>
-                <CopyablePre
-                  content={isWindows 
-                    ? `setx EDITOR "prompt-foundry --new-window"`
-                    : `export EDITOR="prompt-foundry --new-window"`
-                  }
                 />
               </div>
             ),
