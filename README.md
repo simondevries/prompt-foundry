@@ -12,19 +12,23 @@
   </a>
 </div>
 
-Jump to: [Demo](https://github.com/simondevries/prompt-foundry#demo) | [Setup instructions](https://github.com/simondevries/prompt-foundry#demo)
+Jump to: [Demo](https://github.com/simondevries/prompt-foundry#demo) | [Setup instructions](https://github.com/simondevries/prompt-foundry#setup) | [Install vscode](https://marketplace.visualstudio.com/items?itemName=sdevries.prompt-foundry) | [Install OpenVSX](https://open-vsx.org/extension/sdevries/prompt-foundry)
 
-Prompt Foundry is a VS Code extension that makes AI more consistent and effective in large codebases, allowing you to get tasks done more effectively. Instead of rewriting context and task descriptions every session, you build a personal library of reusable prompt blocks\* — architecture notes, coding standards, behavioural contracts and expectations — and snap them together before each task. A bundled MCP server lets the AI write discoveries back into that library, so your prompts improve over time without manual upkeep.
+At the most basic level, we are just trying to make AI more effective at completing tasks. There are so many tools that try to solve this: memory management tools, bloated agents.md files, RAGs.
 
-\*A **prompt block** a markdown file that represents a prompt template in your library which is compiled with other blocks and your main instruction to form a complete prompt before sending to the AI.
+Prompt Foundry takes a simpler but more powerful approach, just make it possible to quickly write highly specific tasks. The result is more consistent, more effective AI, especially in large codebases.
+
+- Construct your prompt from reusable markdown blocks of instructions and information; architecture notes, coding standards, behavioural contracts and expectations
+- MCP server lets the AI update those blocks mid-session, so your library improves over time
+- Star blocks as goals to signal which instructions matter most
 
 | Problem                                                               | How Foundry handles it                                                                                                                                                                       |
 | :-------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Knowledge from AI sessions gets lost at the end of the session        | Maintain a personal library of context and architecture files (second brain). Create, update, append MCP tools: "please update xxx block with what we learnt"                                |
-| Prompt library not accessible from Claude Code CLI                    | TUI to attach instructions to your prompt directly from the CLI tool                                                                                                                         |
 | AI doesn't behave how I want it                                       | AI Contract defines role, style, and behavioural expectations upfront                                                                                                                        |
 | Some instructions matter more than others                             | Star a prompt block to surface it as a key goal, or set a reference to position it at the right point in the workflow                                                                        |
 | AI gets confused by conflicting information in `Agents.md` and skills | Task-specific prompt blocks keep global context lean and targeted                                                                                                                            |
+| Prompt library not accessible from Claude Code CLI                    | TUI to attach instructions to your prompt directly from the CLI tool                                                                                                                         |
 | My MCP tool to my local file system is not powerful enough            | Use Liquid templating syntax to make prompt blocks more specific; use MCP tools to append to blocks (e.g. keep a log as the AI goes); review changes before committing to the prompt library |
 
 ### Overview of features
